@@ -276,6 +276,7 @@ _UI_EXTERN uiMenuItem *uiMenuAppendPasteItem(uiMenu *m, const char *name);
 _UI_EXTERN uiMenuItem *uiMenuAppendCutItem(uiMenu *m, const char *name);
 _UI_EXTERN uiMenuItem *uiMenuAppendUndoItem(uiMenu *m);
 _UI_EXTERN uiMenuItem *uiMenuAppendRedoItem(uiMenu *m);
+_UI_EXTERN uiMenuItem *uiMenuAppendFullscreenItem(uiMenu *m);
 _UI_EXTERN uiMenuItem *uiMenuAppendSelectAllItem(uiMenu *m, const char *name);
 _UI_EXTERN uiMenuItem *uiMenuAppendPreferencesItem(uiMenu *m);
 _UI_EXTERN uiMenuItem *uiMenuAppendAboutItem(uiMenu *m);

@@ -9,6 +9,7 @@ uiMenuItem *quitItem;
 uiMenu *editMenu;
 uiMenuItem *undoItem;
 uiMenuItem *copyItem;
+uiMenuItem *selectAllItem;
 uiMenuItem *pasteItem;
 uiMenuItem *cutItem;
 uiMenuItem *checkItem;
@@ -20,6 +21,7 @@ uiMenuItem *enableThisItem;
 uiMenuItem *forceCheckedItem;
 uiMenuItem *forceUncheckedItem;
 uiMenuItem *whatWindowItem;
+uiMenuItem *fullscreenItem;
 uiMenu *moreTestsMenu;
 uiMenuItem *quitEnabledItem;
 uiMenuItem *prefsEnabledItem;
@@ -66,7 +68,7 @@ void initMenus(void)
 	undoItem = uiMenuAppendUndoItem(editMenu);
 	undoItem = uiMenuAppendRedoItem(editMenu);
 	uiMenuAppendSeparator(editMenu);
-	copyItem = uiMenuAppendSelectAllItem(editMenu, "Select All");
+	selectAllItem = uiMenuAppendSelectAllItem(editMenu, "Select All");
 	copyItem = uiMenuAppendCopyItem(editMenu, "Copy");
 	pasteItem = uiMenuAppendPasteItem(editMenu, "Paste");
 	cutItem = uiMenuAppendCutItem(editMenu, "Cut");
@@ -87,6 +89,7 @@ void initMenus(void)
 	uiMenuAppendSeparator(testMenu);
 	whatWindowItem = uiMenuAppendItem(testMenu, "What Window?");
 	uiMenuItemOnClicked(whatWindowItem, whatWindow, NULL);
+	fullscreenItem = uiMenuAppendFullscreenItem(testMenu);
 
 	moreTestsMenu = uiNewMenu("More Tests");
 	quitEnabledItem = uiMenuAppendCheckItem(moreTestsMenu, "Quit Item Enabled");

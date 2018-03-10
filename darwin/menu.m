@@ -30,7 +30,8 @@ enum {
 	typeCut,
 	typeUndo,
 	typeRedo,
-	typeSelectAll
+	typeSelectAll,
+	typeFullscreen,
 };
 
 static void mapItemReleaser(void *key, void *value)
@@ -172,7 +173,7 @@ static void mapItemReleaser(void *key, void *value)
 	// to do that, we simply leave the target as nil
 	[appMenu addItem:item];
 	item = [[[NSMenuItem alloc] initWithTitle:@"Hide Others" action:@selector(hideOtherApplications:) keyEquivalent:@"h"] autorelease];
-	[item setKeyEquivalentModifierMask:(NSAlternateKeyMask | NSCommandKeyMask)];
+	[item setKeyEquivalentModifierMask:(NSAlternateKeyMask | NSCommandKeyMask)];;
 	[appMenu addItem:item];
 	item = [[[NSMenuItem alloc] initWithTitle:@"Show All" action:@selector(unhideAllApplications:) keyEquivalent:@""] autorelease];
 	[appMenu addItem:item];
@@ -276,6 +277,11 @@ static uiMenuItem *newItem(uiMenu *m, int type, const char *name)
 		item->item = [[NSMenuItem alloc] initWithTitle:toNSString(name) action:@selector(cut:) keyEquivalent:@"x"];
 		[m->menu addItem:item->item];
 		break;
+	case typeSelectAll:
+		item->item = [[NSMenuItem alloc] initWithTitle:toNSString(name) action:@selector(selectAll:) keyEquivalent:@"a"];
+		[m->menu addItem:item->item];
+		break;
+	//name is ignored for these
 	case typeUndo:
 		item->item = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(undo:) keyEquivalent:@"z"];
 		[m->menu addItem:item->item];
@@ -284,8 +290,9 @@ static uiMenuItem *newItem(uiMenu *m, int type, const char *name)
 		item->item = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(redo:) keyEquivalent:@"Z"];
 		[m->menu addItem:item->item];
 		break;
-	case typeSelectAll:
-		item->item = [[NSMenuItem alloc] initWithTitle:toNSString(name) action:@selector(selectAll:) keyEquivalent:@"a"];
+	case typeFullscreen:
+		item->item = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(toggleFullScreen:) keyEquivalent:@"f"];
+		[item->item setKeyEquivalentModifierMask:(NSControlKeyMask | NSCommandKeyMask)];
 		[m->menu addItem:item->item];
 		break;
 	default:
@@ -356,6 +363,14 @@ uiMenuItem *uiMenuAppendSelectAllItem(uiMenu *m, const char *name)
 	// duplicate check is in the register:to: selector
 	return newItem(m, typeSelectAll, name);
 }
+
+
+uiMenuItem *uiMenuAppendFullscreenItem(uiMenu *m)
+{
+	// duplicate check is in the register:to: selector
+	return newItem(m, typeFullscreen, NULL);
+}
+
 
 uiMenuItem *uiMenuAppendPreferencesItem(uiMenu *m)
 {
