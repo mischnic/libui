@@ -8,6 +8,9 @@ uiMenuItem *shouldQuitItem;
 uiMenuItem *quitItem;
 uiMenu *editMenu;
 uiMenuItem *undoItem;
+uiMenuItem *copyItem;
+uiMenuItem *pasteItem;
+uiMenuItem *cutItem;
 uiMenuItem *checkItem;
 uiMenuItem *accelItem;
 uiMenuItem *prefsItem;
@@ -60,8 +63,13 @@ void initMenus(void)
 	quitItem = uiMenuAppendQuitItem(fileMenu);
 
 	editMenu = uiNewMenu("Edit");
-	undoItem = uiMenuAppendItem(editMenu, "Undo");
-	uiMenuItemDisable(undoItem);
+	undoItem = uiMenuAppendUndoItem(editMenu);
+	undoItem = uiMenuAppendRedoItem(editMenu);
+	uiMenuAppendSeparator(editMenu);
+	copyItem = uiMenuAppendSelectAllItem(editMenu, "Select All");
+	copyItem = uiMenuAppendCopyItem(editMenu, "Copy");
+	pasteItem = uiMenuAppendPasteItem(editMenu, "Paste");
+	cutItem = uiMenuAppendCutItem(editMenu, "Cut");
 	uiMenuAppendSeparator(editMenu);
 	checkItem = uiMenuAppendCheckItem(editMenu, "Check Me\tTest");
 	accelItem = uiMenuAppendItem(editMenu, "A&ccele&&rator T_es__t");

@@ -25,6 +25,12 @@ enum {
 	typePreferences,
 	typeAbout,
 	typeSeparator,
+	typeCopy,
+	typePaste,
+	typeCut,
+	typeUndo,
+	typeRedo,
+	typeSelectAll
 };
 
 static void mapItemReleaser(void *key, void *value)
@@ -258,6 +264,30 @@ static uiMenuItem *newItem(uiMenu *m, int type, const char *name)
 		item->item = [[NSMenuItem separatorItem] retain];
 		[m->menu addItem:item->item];
 		break;
+	case typeCopy:
+		item->item = [[NSMenuItem alloc] initWithTitle:toNSString(name) action:@selector(copy:) keyEquivalent:@"c"];
+		[m->menu addItem:item->item];
+		break;
+	case typePaste:
+		item->item = [[NSMenuItem alloc] initWithTitle:toNSString(name) action:@selector(paste:) keyEquivalent:@"v"];
+		[m->menu addItem:item->item];
+		break;
+	case typeCut:
+		item->item = [[NSMenuItem alloc] initWithTitle:toNSString(name) action:@selector(cut:) keyEquivalent:@"x"];
+		[m->menu addItem:item->item];
+		break;
+	case typeUndo:
+		item->item = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(undo:) keyEquivalent:@"z"];
+		[m->menu addItem:item->item];
+		break;
+	case typeRedo:
+		item->item = [[NSMenuItem alloc] initWithTitle:@"" action:@selector(redo:) keyEquivalent:@"Z"];
+		[m->menu addItem:item->item];
+		break;
+	case typeSelectAll:
+		item->item = [[NSMenuItem alloc] initWithTitle:toNSString(name) action:@selector(selectAll:) keyEquivalent:@"a"];
+		[m->menu addItem:item->item];
+		break;
 	default:
 		item->item = [[NSMenuItem alloc] initWithTitle:toNSString(name) action:@selector(onClicked:) keyEquivalent:@""];
 		[item->item setTarget:appDelegate().menuManager];
@@ -289,6 +319,42 @@ uiMenuItem *uiMenuAppendQuitItem(uiMenu *m)
 {
 	// duplicate check is in the register:to: selector
 	return newItem(m, typeQuit, NULL);
+}
+
+uiMenuItem *uiMenuAppendCopyItem(uiMenu *m, const char *name)
+{
+	// duplicate check is in the register:to: selector
+	return newItem(m, typeCopy, name);
+}
+
+uiMenuItem *uiMenuAppendPasteItem(uiMenu *m, const char *name)
+{
+	// duplicate check is in the register:to: selector
+	return newItem(m, typePaste, name);
+}
+
+uiMenuItem *uiMenuAppendCutItem(uiMenu *m, const char *name)
+{
+	// duplicate check is in the register:to: selector
+	return newItem(m, typeCut, name);
+}
+
+uiMenuItem *uiMenuAppendUndoItem(uiMenu *m)
+{
+	// duplicate check is in the register:to: selector
+	return newItem(m, typeUndo, NULL);
+}
+
+uiMenuItem *uiMenuAppendRedoItem(uiMenu *m)
+{
+	// duplicate check is in the register:to: selector
+	return newItem(m, typeRedo, NULL);
+}
+
+uiMenuItem *uiMenuAppendSelectAllItem(uiMenu *m, const char *name)
+{
+	// duplicate check is in the register:to: selector
+	return newItem(m, typeSelectAll, name);
 }
 
 uiMenuItem *uiMenuAppendPreferencesItem(uiMenu *m)
