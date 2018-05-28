@@ -1,13 +1,11 @@
-
 #ifndef __LIBUI_UIPRIV_QT5_HPP__
 #define __LIBUI_UIPRIV_QT5_HPP__
 
 #include "../ui.h"
-#include "../ui_qt5.h"
 #include "../common/uipriv.h"
 
-extern void initAlloc(void);
-extern void uninitAlloc(void);
+extern void uiprivInitAlloc(void);
+extern void uiprivUninitAlloc(void);
 
 // text
 class QString;

@@ -1,4 +1,3 @@
-
 #include "uipriv_qt5.hpp"
 
 #include <QTabWidget>
@@ -59,7 +58,7 @@ void uiTabDelete(uiTab *t, uintmax_t n)
 	}
 }
 
-uintmax_t uiTabNumPages(uiTab *t)
+int uiTabNumPages(uiTab *t)
 {
 	if (auto tabWidget = uiValidateAndCastObjTo<QTabWidget>(t)) {
 		return tabWidget->count();
@@ -73,7 +72,7 @@ int uiTabMargined(uiTab *t, uintmax_t n)
 	return 0;
 }
 
-void uiTabSetMargined(uiTab *t, uintmax_t n, int margined)
+void uiTabSetMargined(uiTab *t, int n, int margined)
 {
 	qWarning("TODO %p, %d, %d", (void*)t, (int)n, margined);
 }

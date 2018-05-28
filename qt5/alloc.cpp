@@ -1,4 +1,3 @@
-
 #include "uipriv_qt5.hpp"
 
 #include <QHash>
@@ -14,7 +13,7 @@ static QHash<void*,const char *> allocations;
 static QThread *uiThread = nullptr;
 #endif
 
-void initAlloc(void)
+void uiprivInitAlloc(void)
 {
 #ifdef QT_DEBUG
 	uiThread = QThread::currentThread();
@@ -30,7 +29,7 @@ static void checkThread(const char *func)
 #endif
 }
 
-void uninitAlloc(void)
+void uiprivUninitAlloc(void)
 {
 	checkThread(QT_MESSAGELOG_FUNC);
 	if (!allocations.isEmpty()) {
@@ -42,7 +41,7 @@ void uninitAlloc(void)
 	}
 }
 
-void *uiAlloc(size_t size, const char *type)
+void *uiprivAlloc(size_t size, const char *type)
 {
 	checkThread(QT_MESSAGELOG_FUNC);
 	auto p = malloc(size);
@@ -50,7 +49,7 @@ void *uiAlloc(size_t size, const char *type)
 	return p;
 }
 
-void *uiRealloc(void *p, size_t new_size, const char *type)
+void *uiprivRealloc(void *p, size_t new_size, const char *type)
 {
 	checkThread(QT_MESSAGELOG_FUNC);
 
@@ -64,7 +63,7 @@ void *uiRealloc(void *p, size_t new_size, const char *type)
 	return p;
 }
 
-void uiFree(void *p)
+void uiprivFree(void *p)
 {
 	checkThread(QT_MESSAGELOG_FUNC);
 	if (!allocations.remove(p)) {

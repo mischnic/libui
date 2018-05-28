@@ -1,4 +1,3 @@
-
 #include "uipriv_qt5.hpp"
 
 #include <QComboBox>
@@ -12,7 +11,7 @@ void uiComboboxAppend(uiCombobox *c, const char *text)
 	}
 }
 
-intmax_t uiComboboxSelected(uiCombobox *c)
+int uiComboboxSelected(uiCombobox *c)
 {
 	if (auto comboBox = uiValidateAndCastObjTo<QComboBox>(c)) {
 		return comboBox->currentIndex();

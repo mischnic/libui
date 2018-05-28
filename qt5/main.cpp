@@ -1,10 +1,11 @@
-
 #include "uipriv_qt5.hpp"
 
 #include <QApplication>
 #include <QTimer>
 #include <QWidget>
 #include <QThread>
+#include <QObject>
+#include "timer.hpp"
 
 #include <functional>
 
@@ -38,7 +39,7 @@ const char *uiInit(uiInitOptions *o)
 	app->setQuitOnLastWindowClosed(false);
 	app->setStyleSheet(styleSheet);
 
-	initAlloc();
+	uiprivInitAlloc();
 
 	return NULL;
 }
@@ -53,7 +54,7 @@ void uiUninit(void)
 		delete app->topLevelWidgets().first();
 	}
 
-	uninitAlloc();
+	uiprivUninitAlloc();
 
 	delete app;
 }
@@ -135,4 +136,30 @@ void uiQueueMain(void (*f)(void *data), void *data)
 			f(data);
 		});
 	}
+}
+
+class Timer : public QObject {
+
+public:
+	Timer(QTimer *t, int (*f)(void *), void *d): timer(t), cb(f), data(d) {}
+
+public slots:
+	void call() {
+		if(!(this->cb(this->data))){
+			timer->stop();
+		}
+	}
+
+private:
+	QTimer *timer;
+	int (*cb)(void *);
+	void *data;
+};
+
+void uiTimer(int milliseconds, int (*f)(void *data), void *data)
+{
+	QTimer *timer = new QTimer();
+	Timer *t = new Timer(timer, f, data);
+	QObject::connect(timer, SIGNAL(timeout()), t, SLOT(call()));
+	timer->start(milliseconds);
 }

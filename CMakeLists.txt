@@ -17,6 +17,7 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 # TODO figure out if FORCE is needed here
 # TODO figure out whether STRING "" is best or if something else is better; also what FORCE does because I forget and later I say it's needed
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8" CACHE STRING "" FORCE)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 
 # we want to disable incremental linking
 # see also:
@@ -149,7 +150,8 @@ macro(_target_link_options_private _target)
 endmacro()
 
 add_subdirectory("common")
-add_subdirectory("${_OSNAME}")
+# add_subdirectory("${_OSNAME}")
+add_subdirectory("qt5")
 add_library(libui ${_LIBUI_SOURCES})
 target_include_directories(libui
 	PUBLIC .

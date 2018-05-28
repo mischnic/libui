@@ -1,4 +1,3 @@
-
 #include "uipriv_qt5.hpp"
 
 #include <QProgressBar>

@@ -1,11 +1,10 @@
-
 #include "uipriv_qt5.hpp"
 
 #include <QSpinBox>
 
 struct uiSpinbox : public uiQt5Control {};
 
-intmax_t uiSpinboxValue(uiSpinbox *s)
+int uiSpinboxValue(uiSpinbox *s)
 {
 	if (auto spinBox = uiValidateAndCastObjTo<QSpinBox>(s)) {
 		return spinBox->value();
@@ -13,7 +12,7 @@ intmax_t uiSpinboxValue(uiSpinbox *s)
 	return 0;
 }
 
-void uiSpinboxSetValue(uiSpinbox *s, intmax_t value)
+void uiSpinboxSetValue(uiSpinbox *s, int value)
 {
 	if (auto spinBox = uiValidateAndCastObjTo<QSpinBox>(s)) {
 		spinBox->setValue(value);
@@ -29,7 +28,7 @@ void uiSpinboxOnChanged(uiSpinbox *s, void (*f)(uiSpinbox *, void *), void *data
 	}
 }
 
-uiSpinbox *uiNewSpinbox(intmax_t min, intmax_t max)
+uiSpinbox *uiNewSpinbox(int min, int max)
 {
 	auto spinBox = new QSpinBox;
 	spinBox->setRange(qMin(min,max),qMax(min,max));

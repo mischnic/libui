@@ -1,11 +1,10 @@
-
 #include "uipriv_qt5.hpp"
 
 #include <QSlider>
 
 struct uiSlider : public uiQt5Control {};
 
-intmax_t uiSliderValue(uiSlider *s)
+int uiSliderValue(uiSlider *s)
 {
 	if (auto slider = uiValidateAndCastObjTo<QSlider>(s)) {
 		return slider->value();
@@ -13,7 +12,7 @@ intmax_t uiSliderValue(uiSlider *s)
 	return 0;
 }
 
-void uiSliderSetValue(uiSlider *s, intmax_t value)
+void uiSliderSetValue(uiSlider *s, int value)
 {
 	if (auto slider = uiValidateAndCastObjTo<QSlider>(s)) {
 		return slider->setValue((int)value);
@@ -29,7 +28,7 @@ void uiSliderOnChanged(uiSlider *s, void (*f)(uiSlider *, void *), void *data)
 	}
 }
 
-uiSlider *uiNewSlider(intmax_t min, intmax_t max)
+uiSlider *uiNewSlider(int min, int max)
 {
 	auto slider = new QSlider(Qt::Horizontal);
 	slider->setRange(qMin<int>(min,max), qMax<int>(min,max));

@@ -1,4 +1,3 @@
-
 #include "uipriv_qt5.hpp"
 
 #include <QLineEdit>
@@ -51,5 +50,21 @@ uiEntry *uiNewEntry(void)
 
 	// note styling is being set in main.cpp -> styleSheet
 
-	return uiAllocQt5ControlType(uiEntry,lineEdit,uiQt5Control::DeleteControlOnQObjectFree);
+	return uiAllocQt5ControlType(uiEntry, lineEdit, uiQt5Control::DeleteControlOnQObjectFree);
+}
+
+uiEntry *uiNewPasswordEntry(void)
+{
+	auto lineEdit = new QLineEdit;
+	lineEdit->setEchoMode(QLineEdit::Password);
+
+	// note styling is being set in main.cpp -> styleSheet
+
+	return uiAllocQt5ControlType(uiEntry, lineEdit, uiQt5Control::DeleteControlOnQObjectFree);
+}
+
+
+uiEntry *uiNewSearchEntry(void)
+{
+	return uiNewEntry();
 }
