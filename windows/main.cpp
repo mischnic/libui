@@ -45,13 +45,15 @@ void unregisterMessageFilter(void)
 
 static void processMessage(MSG *msg)
 {
-	HWND active;
+	HWND correctParent;
 
-	// TODO really active? or parentToplevel(msg->hwnd)?
-	active = GetActiveWindow();
-	if (active != NULL)
-		// TODO find documentation that says IsDialogMessage() calls CallMsgFilter() for us, because that's what's happening
-		if (IsDialogMessage(active, msg) != 0)
+	if (msg->hwnd != NULL)
+		correctParent = parentToplevel(msg->hwnd);
+	else		// just to be safe
+		correctParent = GetActiveWindow();
+	if (correctParent != NULL)
+		// this calls our mesage filter above for us
+		if (IsDialogMessage(correctParent, msg) != 0)
 			return;
 	TranslateMessage(msg);
 	DispatchMessageW(msg);
@@ -73,6 +75,11 @@ void uiMain(void)
 {
 	while (uiMainStep(1))
 		;
+}
+
+void uiMainSteps(void)
+{
+	// don't need to do anything here
 }
 
 static int peekMessage(MSG *msg)
@@ -118,6 +125,18 @@ void uiQuit(void)
 void uiQueueMain(void (*f)(void *data), void *data)
 {
 	if (PostMessageW(utilWindow, msgQueued, (WPARAM) f, (LPARAM) data) == 0)
-		// TODO this is likely not safe to call across threads (allocates memory)
+		// LONGTERM this is likely not safe to call across threads (allocates memory)
 		logLastError(L"error queueing function to run on main thread");
+}
+
+void uiTimer(int milliseconds, int (*f)(void *data), void *data)
+{
+	uiprivTimer *timer;
+
+	timer = uiprivNew(uiprivTimer);
+	timer->f = f;
+	timer->data = data;
+	// note that timer IDs are pointer sized precisely so we can use them as timer IDs; see https://blogs.msdn.microsoft.com/oldnewthing/20150924-00/?p=91521
+	if (SetTimer(utilWindow, (UINT_PTR) timer, milliseconds, NULL) == 0)
+		logLastError(L"error calling SetTimer() in uiTimer()");
 }

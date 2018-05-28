@@ -4,6 +4,7 @@
 // TODO
 // - test multiple clips
 // - test saving and restoring clips
+// - copy tests from https://github.com/Microsoft/WinObjC
 
 struct drawtest {
 	const char *name;
@@ -1964,7 +1965,7 @@ static const struct drawtest tests[] = {
 	{ NULL, NULL },
 };
 
-void runDrawTest(intmax_t n, uiAreaDrawParams *p)
+void runDrawTest(int n, uiAreaDrawParams *p)
 {
 	(*(tests[n].draw))(p);
 }

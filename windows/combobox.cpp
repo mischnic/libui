@@ -1,9 +1,6 @@
 // 20 may 2015
 #include "uipriv_windows.hpp"
 
-// TODO
-// - is there extra space on the bottom?
-
 // we as Common Controls 6 users don't need to worry about the height of comboboxes; see http://blogs.msdn.com/b/oldnewthing/archive/2006/03/10/548537.aspx
 
 struct uiCombobox {
@@ -36,10 +33,10 @@ void uiComboboxDestroy(uiControl *cc)
 uiWindowsControlAllDefaultsExceptDestroy(uiCombobox)
 
 // from http://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
-#define comboboxWidth 107 /* this is actually the shorter progress bar width, but Microsoft only indicates as wide as necessary; TODO */
-#define comboboxHeight 14
+#define comboboxWidth 107	/* this is actually the shorter progress bar width, but Microsoft only indicates as wide as necessary; LONGTERM */
+#define comboboxHeight 14	/* LONGTERM: is this too high? */
 
-static void uiComboboxMinimumSize(uiWindowsControl *cc, intmax_t *width, intmax_t *height)
+static void uiComboboxMinimumSize(uiWindowsControl *cc, int *width, int *height)
 {
 	uiCombobox *c = uiCombobox(cc);
 	uiWindowsSizing sizing;
@@ -69,20 +66,20 @@ void uiComboboxAppend(uiCombobox *c, const char *text)
 		logLastError(L"error appending item to uiCombobox");
 	else if (res == (LRESULT) CB_ERRSPACE)
 		logLastError(L"memory exhausted appending item to uiCombobox");
-	uiFree(wtext);
+	uiprivFree(wtext);
 }
 
-intmax_t uiComboboxSelected(uiCombobox *c)
+int uiComboboxSelected(uiCombobox *c)
 {
 	LRESULT n;
 
 	n = SendMessage(c->hwnd, CB_GETCURSEL, 0, 0);
 	if (n == (LRESULT) CB_ERR)
 		return -1;
-	return (intmax_t) n;
+	return n;
 }
 
-void uiComboboxSetSelected(uiCombobox *c, intmax_t n)
+void uiComboboxSetSelected(uiCombobox *c, int n)
 {
 	// TODO error check
 	SendMessageW(c->hwnd, CB_SETCURSEL, (WPARAM) n, 0);

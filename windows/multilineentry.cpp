@@ -1,8 +1,7 @@
 // 8 april 2015
 #include "uipriv_windows.hpp"
 
-// TODO there's alpha darkening of text going on; something is up in our parent logic
-// TODO resizing collapses newlines
+// TODO there's alpha darkening of text going on in read-only ones; something is up in our parent logic
 
 struct uiMultilineEntry {
 	uiWindowsControl c;
@@ -38,10 +37,10 @@ uiWindowsControlAllDefaultsExceptDestroy(uiMultilineEntry)
 
 // from http://msdn.microsoft.com/en-us/library/windows/desktop/dn742486.aspx#sizingandspacing
 #define entryWidth 107 /* this is actually the shorter progress bar width, but Microsoft only indicates as wide as necessary */
-// TODO change this for multiline text boxes
+// LONGTERM change this for multiline text boxes (longterm because how?)
 #define entryHeight 14
 
-static void uiMultilineEntryMinimumSize(uiWindowsControl *c, intmax_t *width, intmax_t *height)
+static void uiMultilineEntryMinimumSize(uiWindowsControl *c, int *width, int *height)
 {
 	uiMultilineEntry *e = uiMultilineEntry(c);
 	uiWindowsSizing sizing;
@@ -60,7 +59,6 @@ static void defaultOnChanged(uiMultilineEntry *e, void *data)
 	// do nothing
 }
 
-// TODO apply crlf conversion
 char *uiMultilineEntryText(uiMultilineEntry *e)
 {
 	char *out;
@@ -70,7 +68,6 @@ char *uiMultilineEntryText(uiMultilineEntry *e)
 	return out;
 }
 
-// TODO apply crlf conversion
 void uiMultilineEntrySetText(uiMultilineEntry *e, const char *text)
 {
 	char *crlf;
@@ -78,30 +75,30 @@ void uiMultilineEntrySetText(uiMultilineEntry *e, const char *text)
 	// doing this raises an EN_CHANGED
 	e->inhibitChanged = TRUE;
 	crlf = LFtoCRLF(text);
-	uiWindowsSetWindowText(e->hwnd, text);
-	uiFree(crlf);
+	uiWindowsSetWindowText(e->hwnd, crlf);
+	uiprivFree(crlf);
 	e->inhibitChanged = FALSE;
 	// don't queue the control for resize; entry sizes are independent of their contents
 }
 
-// TOOD crlf stuff
 void uiMultilineEntryAppend(uiMultilineEntry *e, const char *text)
 {
 	LRESULT n;
 	char *crlf;
 	WCHAR *wtext;
 
-	// TODO does doing this raise EN_CHANGED?
+	// doing this raises an EN_CHANGED
+	e->inhibitChanged = TRUE;
 	// TODO preserve selection? caret? what if caret used to be at end?
 	// TODO scroll to bottom?
-	// TODO overdraw issues
 	n = SendMessageW(e->hwnd, WM_GETTEXTLENGTH, 0, 0);
 	SendMessageW(e->hwnd, EM_SETSEL, n, n);
 	crlf = LFtoCRLF(text);
 	wtext = toUTF16(crlf);
-	uiFree(crlf);
+	uiprivFree(crlf);
 	SendMessageW(e->hwnd, EM_REPLACESEL, FALSE, (LPARAM) wtext);
-	uiFree(wtext);
+	uiprivFree(wtext);
+	e->inhibitChanged = FALSE;
 }
 
 void uiMultilineEntryOnChanged(uiMultilineEntry *e, void (*f)(uiMultilineEntry *, void *), void *data)

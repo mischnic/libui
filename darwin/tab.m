@@ -1,8 +1,10 @@
 // 15 august 2015
 #import "uipriv_darwin.h"
 
+// TODO need to jiggle on tab change too (second page disabled tab label initially ambiguous)
+
 @interface tabPage : NSObject {
-	struct singleChildConstraints constraints;
+	uiprivSingleChildConstraints constraints;
 	int margined;
 	NSView *view;		// the NSTabViewItem view itself
 	NSObject *pageID;
@@ -56,7 +58,7 @@ struct uiTab {
 	[self removeChildConstraints];
 	if (self.c == NULL)
 		return;
-	singleChildConstraintsEstablish(&(self->constraints),
+	uiprivSingleChildConstraintsEstablish(&(self->constraints),
 		self->view, [self childView],
 		uiDarwinControlHugsTrailingEdge(uiDarwinControl(self.c)),
 		uiDarwinControlHugsBottom(uiDarwinControl(self.c)),
@@ -66,7 +68,7 @@ struct uiTab {
 
 - (void)removeChildConstraints
 {
-	singleChildConstraintsRemove(&(self->constraints), self->view);
+	uiprivSingleChildConstraintsRemove(&(self->constraints), self->view);
 }
 
 - (int)isMargined
@@ -77,7 +79,7 @@ struct uiTab {
 - (void)setMargined:(int)m
 {
 	self->margined = m;
-	singleChildConstraintsSetMargined(&(self->constraints), self->margined);
+	uiprivSingleChildConstraintsSetMargined(&(self->constraints), self->margined);
 }
 
 @end
@@ -134,7 +136,7 @@ static void tabRelayout(uiTab *t)
 	for (page in t->pages)
 		[page establishChildConstraints];
 	// and this gets rid of some weird issues with regards to box alignment
-	jiggleViewLayout(t->tabview);
+	uiprivJiggleViewLayout(t->tabview);
 }
 
 BOOL uiTabHugsTrailingEdge(uiDarwinControl *c)
@@ -178,12 +180,19 @@ static void uiTabSetHuggingPriority(uiDarwinControl *c, NSLayoutPriority priorit
 	uiDarwinNotifyEdgeHuggingChanged(uiDarwinControl(t));
 }
 
+static void uiTabChildVisibilityChanged(uiDarwinControl *c)
+{
+	uiTab *t = uiTab(c);
+
+	tabRelayout(t);
+}
+
 void uiTabAppend(uiTab *t, const char *name, uiControl *child)
 {
 	uiTabInsertAt(t, name, [t->pages count], child);
 }
 
-void uiTabInsertAt(uiTab *t, const char *name, uintmax_t n, uiControl *child)
+void uiTabInsertAt(uiTab *t, const char *name, int n, uiControl *child)
 {
 	tabPage *page;
 	NSView *view;
@@ -211,14 +220,14 @@ void uiTabInsertAt(uiTab *t, const char *name, uintmax_t n, uiControl *child)
 	[t->pages insertObject:page atIndex:n];
 
 	i = [[[NSTabViewItem alloc] initWithIdentifier:pageID] autorelease];
-	[i setLabel:toNSString(name)];
+	[i setLabel:uiprivToNSString(name)];
 	[i setView:view];
 	[t->tabview insertTabViewItem:i atIndex:n];
 
 	tabRelayout(t);
 }
 
-void uiTabDelete(uiTab *t, uintmax_t n)
+void uiTabDelete(uiTab *t, int n)
 {
 	tabPage *page;
 	uiControl *child;
@@ -242,12 +251,12 @@ void uiTabDelete(uiTab *t, uintmax_t n)
 	tabRelayout(t);
 }
 
-uintmax_t uiTabNumPages(uiTab *t)
+int uiTabNumPages(uiTab *t)
 {
 	return [t->pages count];
 }
 
-int uiTabMargined(uiTab *t, uintmax_t n)
+int uiTabMargined(uiTab *t, int n)
 {
 	tabPage *page;
 
@@ -255,7 +264,7 @@ int uiTabMargined(uiTab *t, uintmax_t n)
 	return [page isMargined];
 }
 
-void uiTabSetMargined(uiTab *t, uintmax_t n, int margined)
+void uiTabSetMargined(uiTab *t, int n, int margined)
 {
 	tabPage *page;
 

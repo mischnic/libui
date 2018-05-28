@@ -29,9 +29,10 @@ struct uiArea {
 	NSView *view;			// either sv or area depending on whether it is scrolling
 	NSScrollView *sv;
 	areaView *area;
-	struct scrollViewData *d;
+	uiprivScrollViewData *d;
 	uiAreaHandler *ah;
 	BOOL scrolling;
+	NSEvent *dragevent;
 };
 
 @implementation areaView
@@ -56,7 +57,7 @@ struct uiArea {
 
 	c = (CGContextRef) [[NSGraphicsContext currentContext] graphicsPort];
 	// see draw.m under text for why we need the height
-	dp.Context = newContext(c, [self bounds].size.height);
+	dp.Context = uiprivDrawNewContext(c, [self bounds].size.height);
 
 	dp.AreaWidth = 0;
 	dp.AreaHeight = 0;
@@ -73,7 +74,7 @@ struct uiArea {
 	// no need to save or restore the graphics state to reset transformations; Cocoa creates a brand-new context each time
 	(*(a->ah->Draw))(a->ah, a, &dp);
 
-	freeContext(dp.Context);
+	uiprivDrawFreeContext(dp.Context);
 }
 
 - (BOOL)isFlipped
@@ -130,7 +131,7 @@ struct uiArea {
 	uiArea *a = self->libui_a;
 	uiAreaMouseEvent me;
 	NSPoint point;
-	uintmax_t buttonNumber;
+	int buttonNumber;
 	NSUInteger pmb;
 	unsigned int i, max;
 
@@ -200,8 +201,12 @@ struct uiArea {
 			me.Held1To64 |= j;
 	}
 
-	if (self->libui_enabled)
+	if (self->libui_enabled) {
+		// and allow dragging here
+		a->dragevent = e;
 		(*(a->ah->MouseEvent))(a->ah, a, &me);
+		a->dragevent = nil;
+	}
 }
 
 #define mouseEvent(name) \
@@ -259,7 +264,7 @@ mouseEvent(otherMouseUp)
 
 	ke.Up = up;
 
-	if (!fromKeycode([e keyCode], &ke))
+	if (!uiprivFromKeycode([e keyCode], &ke))
 		return 0;
 	return [self sendKeyEvent:&ke];
 }
@@ -284,7 +289,7 @@ mouseEvent(otherMouseUp)
 
 	// Mac OS X sends this event on both key up and key down.
 	// Fortunately -[e keyCode] IS valid here, so we can simply map from key code to Modifiers, get the value of [e modifierFlags], and check if the respective bit is set or not — that will give us the up/down state
-	if (!keycodeModifier([e keyCode], &whichmod))
+	if (!uiprivKeycodeModifier([e keyCode], &whichmod))
 		return 0;
 	ke.Modifier = whichmod;
 	ke.Modifiers = [self parseModifiers:e];
@@ -304,6 +309,7 @@ mouseEvent(otherMouseUp)
 		[self setNeedsDisplay:YES];
 }
 
+// TODO does this update the frame?
 - (void)setScrollingSize:(NSSize)s
 {
 	self->libui_ss = s;
@@ -344,7 +350,7 @@ static void uiAreaDestroy(uiControl *c)
 	uiArea *a = uiArea(c);
 
 	if (a->scrolling)
-		scrollViewFreeData(a->sv, a->d);
+		uiprivScrollViewFreeData(a->sv, a->d);
 	[a->area release];
 	if (a->scrolling)
 		[a->sv release];
@@ -355,7 +361,7 @@ static void uiAreaDestroy(uiControl *c)
 // by default, NSApplication eats some key events
 // this prevents that from happening with uiArea
 // see http://stackoverflow.com/questions/24099063/how-do-i-detect-keyup-in-my-nsview-with-the-command-key-held and http://lists.apple.com/archives/cocoa-dev/2003/Oct/msg00442.html
-int sendAreaEvents(NSEvent *e)
+int uiprivSendAreaEvents(NSEvent *e)
 {
 	NSEventType type;
 	id focused;
@@ -381,10 +387,10 @@ int sendAreaEvents(NSEvent *e)
 	return 0;
 }
 
-void uiAreaSetSize(uiArea *a, intmax_t width, intmax_t height)
+void uiAreaSetSize(uiArea *a, int width, int height)
 {
 	if (!a->scrolling)
-		userbug("You cannot call uiAreaSetSize() on a non-scrolling uiArea. (area: %p)", a);
+		uiprivUserBug("You cannot call uiAreaSetSize() on a non-scrolling uiArea. (area: %p)", a);
 	[a->area setScrollingSize:NSMakeSize(width, height)];
 }
 
@@ -396,9 +402,33 @@ void uiAreaQueueRedrawAll(uiArea *a)
 void uiAreaScrollTo(uiArea *a, double x, double y, double width, double height)
 {
 	if (!a->scrolling)
-		userbug("You cannot call uiAreaScrollTo() on a non-scrolling uiArea. (area: %p)", a);
+		uiprivUserBug("You cannot call uiAreaScrollTo() on a non-scrolling uiArea. (area: %p)", a);
 	[a->area scrollRectToVisible:NSMakeRect(x, y, width, height)];
 	// don't worry about the return value; it just says whether scrolling was needed
+}
+
+void uiAreaBeginUserWindowMove(uiArea *a)
+{
+	uiprivNSWindow *w;
+
+	w = (uiprivNSWindow *) [a->area window];
+	if (w == nil)
+		return;		// TODO
+	if (a->dragevent == nil)
+		return;		// TODO
+	[w uiprivDoMove:a->dragevent];
+}
+
+void uiAreaBeginUserWindowResize(uiArea *a, uiWindowResizeEdge edge)
+{
+	uiprivNSWindow *w;
+
+	w = (uiprivNSWindow *) [a->area window];
+	if (w == nil)
+		return;		// TODO
+	if (a->dragevent == nil)
+		return;		// TODO
+	[w uiprivDoResize:a->dragevent on:edge];
 }
 
 uiArea *uiNewArea(uiAreaHandler *ah)
@@ -417,10 +447,10 @@ uiArea *uiNewArea(uiAreaHandler *ah)
 	return a;
 }
 
-uiArea *uiNewScrollingArea(uiAreaHandler *ah, intmax_t width, intmax_t height)
+uiArea *uiNewScrollingArea(uiAreaHandler *ah, int width, int height)
 {
 	uiArea *a;
-	struct scrollViewCreateParams p;
+	uiprivScrollViewCreateParams p;
 
 	uiDarwinNewControl(uiArea, a);
 
@@ -430,14 +460,14 @@ uiArea *uiNewScrollingArea(uiAreaHandler *ah, intmax_t width, intmax_t height)
 	a->area = [[areaView alloc] initWithFrame:NSMakeRect(0, 0, width, height)
 		area:a];
 
-	memset(&p, 0, sizeof (struct scrollViewCreateParams));
+	memset(&p, 0, sizeof (uiprivScrollViewCreateParams));
 	p.DocumentView = a->area;
 	p.BackgroundColor = [NSColor controlColor];
 	p.DrawsBackground = 1;
 	p.Bordered = NO;
 	p.HScroll = YES;
 	p.VScroll = YES;
-	a->sv = mkScrollView(&p, &(a->d));
+	a->sv = uiprivMkScrollView(&p, &(a->d));
 
 	a->view = a->sv;
 

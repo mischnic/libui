@@ -12,13 +12,14 @@ struct uiRadioButtons {
 	uiWindowsControl c;
 	HWND hwnd;					// of the container
 	std::vector<HWND> *hwnds;		// of the buttons
+	void (*onSelected)(uiRadioButtons *, void *);
+	void *onSelectedData;
 };
 
 static BOOL onWM_COMMAND(uiControl *c, HWND clicked, WORD code, LRESULT *lResult)
 {
 	uiRadioButtons *r = uiRadioButtons(c);
 	WPARAM check;
-	uintmax_t i;
 
 	if (code != BN_CLICKED)
 		return FALSE;
@@ -28,8 +29,14 @@ static BOOL onWM_COMMAND(uiControl *c, HWND clicked, WORD code, LRESULT *lResult
 			check = BST_CHECKED;
 		SendMessage(hwnd, BM_SETCHECK, check, 0);
 	}
+	(*(r->onSelected))(r, r->onSelectedData);
 	*lResult = 0;
 	return TRUE;
+}
+
+static void defaultOnSelected(uiRadioButtons *r, void *data)
+{
+	// do nothing
 }
 
 static void uiRadioButtonsDestroy(uiControl *c)
@@ -53,10 +60,10 @@ uiWindowsControlAllDefaultsExceptDestroy(uiRadioButtons)
 // from http://msdn.microsoft.com/en-us/library/windows/desktop/bb226818%28v=vs.85%29.aspx
 #define radiobuttonXFromLeftOfBoxToLeftOfLabel 12
 
-static void uiRadioButtonsMinimumSize(uiWindowsControl *c, intmax_t *width, intmax_t *height)
+static void uiRadioButtonsMinimumSize(uiWindowsControl *c, int *width, int *height)
 {
 	uiRadioButtons *r = uiRadioButtons(c);
-	intmax_t wid, maxwid;
+	int wid, maxwid;
 	uiWindowsSizing sizing;
 	int x, y;
 
@@ -84,7 +91,7 @@ static void uiRadioButtonsMinimumSize(uiWindowsControl *c, intmax_t *width, intm
 static void radiobuttonsRelayout(uiRadioButtons *r)
 {
 	RECT client;
-	intmax_t x, y, width, height;
+	int x, y, width, height;
 	int height1;
 	uiWindowsSizing sizing;
 
@@ -133,12 +140,39 @@ void uiRadioButtonsAppend(uiRadioButtons *r, const char *text)
 		BS_RADIOBUTTON | groupTabStop,
 		hInstance, NULL,
 		TRUE);
-	uiFree(wtext);
+	uiprivFree(wtext);
 	uiWindowsEnsureSetParentHWND(hwnd, r->hwnd);
 	uiWindowsRegisterWM_COMMANDHandler(hwnd, onWM_COMMAND, uiControl(r));
 	r->hwnds->push_back(hwnd);
 	radiobuttonsArrangeChildren(r);
 	uiWindowsControlMinimumSizeChanged(uiWindowsControl(r));
+}
+
+int uiRadioButtonsSelected(uiRadioButtons *r)
+{
+	size_t i;
+
+	for (i = 0; i < r->hwnds->size(); i++)
+		if (SendMessage((*(r->hwnds))[i], BM_GETCHECK, 0, 0) == BST_CHECKED)
+			return i;
+	return -1;
+}
+
+void uiRadioButtonsSetSelected(uiRadioButtons *r, int n)
+{
+	int m;
+
+	m = uiRadioButtonsSelected(r);
+	if (m != -1)
+		SendMessage((*(r->hwnds))[m], BM_SETCHECK, BST_UNCHECKED, 0);
+	if (n != -1)
+		SendMessage((*(r->hwnds))[n], BM_SETCHECK, BST_CHECKED, 0);
+}
+
+void uiRadioButtonsOnSelected(uiRadioButtons *r, void (*f)(uiRadioButtons *, void *), void *data)
+{
+	r->onSelected = f;
+	r->onSelectedData = data;
 }
 
 static void onResize(uiWindowsControl *c)
@@ -155,6 +189,8 @@ uiRadioButtons *uiNewRadioButtons(void)
 	r->hwnd = uiWindowsMakeContainer(uiWindowsControl(r), onResize);
 
 	r->hwnds = new std::vector<HWND>;
+
+	uiRadioButtonsOnSelected(r, defaultOnSelected, NULL);
 
 	return r;
 }
