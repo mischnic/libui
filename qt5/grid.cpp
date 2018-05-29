@@ -5,19 +5,48 @@
 
 struct uiGrid : public uiQt5Control {};
 
+
 void uiGridAppend(uiGrid *g, uiControl *c, int left, int top, int xspan, int yspan, int hexpand, uiAlign halign, int vexpand, uiAlign valign)
 {
-	qWarning("TODO params");
+	qWarning("TODO params: hexpand, vexpand");
 
 	if (auto layoutGrid = uiValidateAndCastObjTo<QGridLayout>(g)) {
 		auto obj = uiValidateAndCastObjTo<QObject>(c);
 
-		Qt::Alignment align ;
+		Qt::Alignment alignH;
+		Qt::Alignment alignV;
+		switch(halign){
+			case uiAlignFill:
+				break;
+			case uiAlignStart:
+				alignH = Qt::AlignLeft;
+				break;
+			case uiAlignCenter:
+				alignH = Qt::AlignHCenter;
+				break;
+			case uiAlignEnd:
+				alignH = Qt::AlignRight;
+				break;
+		}
+
+		switch(valign){
+			case uiAlignFill:
+				break;
+			case uiAlignStart:
+				alignV = Qt::AlignTop;
+				break;
+			case uiAlignCenter:
+				alignV = Qt::AlignVCenter;
+				break;
+			case uiAlignEnd:
+				alignV = Qt::AlignBottom;
+				break;
+		}
 
 		if (auto layout = qobject_cast<QLayout*>(obj)) {
-			layoutGrid->addLayout(layout, top, left, xspan, yspan);
+			layoutGrid->addLayout(layout, top, left, xspan, yspan, alignH | alignV);
 		} else if (auto widget = qobject_cast<QWidget*>(obj)) {
-			layoutGrid->addWidget(widget, top, left, xspan, yspan);
+			layoutGrid->addWidget(widget, top, left, xspan, yspan, alignH | alignV);
 		} else {
 			qWarning("object is neither layout nor widget");
 		}
