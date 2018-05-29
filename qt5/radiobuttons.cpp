@@ -48,6 +48,7 @@ uiRadioButtons *uiNewRadioButtons(void)
 {
 	// TODO: check does this need a QButtonGroup or is the layout sufficent?
 	auto layout = new QVBoxLayout;
+	layout->setSpacing(5);
 
 	// note styling is being set in main.cpp -> styleSheet
 

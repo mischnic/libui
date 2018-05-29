@@ -5,7 +5,6 @@
 #include <QWidget>
 #include <QThread>
 #include <QObject>
-#include "timer.hpp"
 
 #include <functional>
 
@@ -143,28 +142,13 @@ void uiQueueMain(void (*f)(void *data), void *data)
 	}
 }
 
-class Timer : public QObject {
-
-public:
-	Timer(QTimer *t, int (*f)(void *), void *d): timer(t), cb(f), data(d) {}
-
-public slots:
-	void call() {
-		if(!(this->cb(this->data))){
-			timer->stop();
-		}
-	}
-
-private:
-	QTimer *timer;
-	int (*cb)(void *);
-	void *data;
-};
-
-void uiTimer(int milliseconds, int (*f)(void *data), void *data)
+void uiTimer(int milliseconds, int (*f)(void* data), void* data)
 {
-	QTimer *timer = new QTimer();
-	Timer *t = new Timer(timer, f, data);
-	QObject::connect(timer, SIGNAL(timeout()), t, SLOT(call()));
-	timer->start(milliseconds);
+    QTimer *timer = new QTimer(QCoreApplication::instance());
+    QObject::connect(timer, &QTimer::timeout, [f, data, timer]() {
+        if (!(f(data))) {
+            timer->stop();
+        }
+    });
+    timer->start(milliseconds);
 }

@@ -7,6 +7,8 @@
 extern void uiprivInitAlloc(void);
 extern void uiprivUninitAlloc(void);
 
+const int marginAmount = 20;
+
 // text
 class QString;
 char *uiQt5StrdupQString(const QString &string);

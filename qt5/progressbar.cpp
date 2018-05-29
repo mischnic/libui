@@ -7,7 +7,14 @@ struct uiProgressBar : public uiQt5Control {};
 void uiProgressBarSetValue(uiProgressBar *p, int value)
 {
 	if (auto progressBar = uiValidateAndCastObjTo<QProgressBar>(p)) {
-		return progressBar->setValue(value);
+		if(value == -1){
+			progressBar->setMaximum(0);
+			progressBar->setMinimum(0);
+		} else {
+			progressBar->setMinimum(0);
+			progressBar->setMaximum(100);
+			progressBar->setValue(value);
+		}
 	}
 }
 
@@ -22,6 +29,8 @@ int uiProgressBarValue(uiProgressBar *p)
 uiProgressBar *uiNewProgressBar(void)
 {
 	auto progressBar = new QProgressBar;
+	progressBar->setMinimum(0);
+	progressBar->setMaximum(100);
 
 	// note styling is being set in main.cpp -> styleSheet
 

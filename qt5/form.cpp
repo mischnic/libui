@@ -126,12 +126,12 @@ void uiFormDelete(uiForm *f, int index)
 
 int uiFormPadded(uiForm *f)
 {
-	return f->padded;
+	// return f->padded;
 }
 
 void uiFormSetPadded(uiForm *f, int padded)
 {
-	f->padded = padded;
+	// f->padded = padded;
 	// if (f->padded) {
 	// 	gtk_grid_set_row_spacing(f->grid, uiprivGTKYPadding);
 	// 	gtk_grid_set_column_spacing(f->grid, uiprivGTKXPadding);

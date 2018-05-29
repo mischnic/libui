@@ -18,6 +18,14 @@ public:
 			onClosing(event);
 		}
 	}
+
+	std::function<void (QResizeEvent *event)> onResize;
+	void resizeEvent(QResizeEvent * event)
+	{
+		if(onResize){
+			onResize(event);
+		}
+	}
 };
 
 char *uiWindowTitle(uiWindow *w)
@@ -40,7 +48,7 @@ void uiWindowOnClosing(uiWindow *w, int (*f)(uiWindow *, void *), void *data)
 	if (auto window = uiValidateAndCastObjTo<WindowWidget>(w)) {
 
 		if (f) {
-			window->onClosing = [f,w,data](QCloseEvent *event){
+			window->onClosing = [f, w, data](QCloseEvent *event){
 				if (f(w,data)) {
 					// eat the event and destroy the control
 					// normally such behavior would be achived with
@@ -94,13 +102,23 @@ void uiWindowSetFullscreen(uiWindow *w, int fullscreen)
 
 int uiWindowMargined(uiWindow *w)
 {
-	qWarning("TODO %p", (void*)w);
+	qWarning("TODO uiWindowMargined");
 	return 0;
 }
 
 void uiWindowSetMargined(uiWindow *w, int margined)
 {
-	qWarning("TODO %p, %d", (void*)w, margined);
+	qWarning("TODO uiWindowSetMargined %d", margined);
+	if (auto window = uiValidateAndCastObjTo<WindowWidget>(w)) {
+		if (window->centralWidget()) {
+			// if(margined){
+				// printf("%s\n", window->centralWidget()->metaObject()->className());
+				window->centralWidget()->setContentsMargins(100, 100, 100, 100);
+			// } else {
+			// 	window->centralWidget()->setContentsMargins(0, 0, 0, 0);
+			// }
+		}
+	}
 }
 
 void uiWindowSetBorderless(uiWindow *w, int borderless)
@@ -133,7 +151,17 @@ void uiWindowSetContentSize(uiWindow *w, int width, int height)
 
 void uiWindowOnContentSizeChanged(uiWindow *w, void (*f)(uiWindow *, void *), void *data)
 {
-	qWarning("TODO uiWindowOnContentSizeChanged");
+	if (auto window = uiValidateAndCastObjTo<WindowWidget>(w)) {
+		if (f) {
+			window->onResize = [f, w, data](QResizeEvent *event){
+				f(w, data);
+				event->accept();
+			};
+		} else {
+			// clear callback
+			window->onResize = nullptr;
+		}
+	}
 }
 
 uiWindow *uiNewWindow(const char *title, int width, int height, int hasMenubar)

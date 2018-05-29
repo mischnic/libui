@@ -68,13 +68,22 @@ int uiTabNumPages(uiTab *t)
 
 int uiTabMargined(uiTab *t, int n)
 {
-	qWarning("TODO %p, %d", (void*)t, (int)n);
+	if (auto tabWidget = uiValidateAndCastObjTo<QTabWidget>(t)) {
+		QMargins s = tabWidget->widget(n)->contentsMargins();
+		return s.top() == marginAmount;
+	}
 	return 0;
 }
 
 void uiTabSetMargined(uiTab *t, int n, int margined)
 {
-	qWarning("TODO %p, %d, %d", (void*)t, (int)n, margined);
+	if (auto tabWidget = uiValidateAndCastObjTo<QTabWidget>(t)) {
+		if(margined){
+			tabWidget->widget(n)->setContentsMargins(marginAmount, marginAmount, marginAmount, marginAmount);		
+		} else{
+			tabWidget->widget(n)->setContentsMargins(0, 0, 0, 0);		
+		}
+	}
 }
 
 uiTab *uiNewTab(void)
