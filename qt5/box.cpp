@@ -23,7 +23,7 @@ void uiBoxAppend(uiBox *b, uiControl *c, int stretchy)
 	}
 }
 
-void uiBoxDelete(uiBox *b, uintmax_t index)
+void uiBoxDelete(uiBox *b, int index)
 {
 	if (auto layoutBox = uiValidateAndCastObjTo<QBoxLayout>(b)) {
 		if (index < (uint)layoutBox->count()) {

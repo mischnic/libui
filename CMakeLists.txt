@@ -150,8 +150,11 @@ macro(_target_link_options_private _target)
 endmacro()
 
 add_subdirectory("common")
-# add_subdirectory("${_OSNAME}")
-add_subdirectory("qt5")
+if(USE_QT)
+	add_subdirectory("qt5")
+else()
+	add_subdirectory("${_OSNAME}")
+endif()
 add_library(libui ${_LIBUI_SOURCES})
 target_include_directories(libui
 	PUBLIC .

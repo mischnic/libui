@@ -5,6 +5,34 @@
 
 struct uiRadioButtons : public uiQt5Control {};
 
+
+int uiRadioButtonsSelected(uiRadioButtons *r)
+{
+	if (auto layout = uiValidateAndCastObjTo<QLayout>(r)) {
+		for(int i = 0; i < layout->count(); i++){
+			if(((QRadioButton*) layout->itemAt(i)->widget())->isChecked()){
+				return i;
+			}
+		}
+	}
+	return -1;
+}
+
+void uiRadioButtonsSetSelected(uiRadioButtons *r, int n)
+{
+	if (auto layout = uiValidateAndCastObjTo<QLayout>(r)) {
+		for(int i = 0; i < layout->count(); i++){
+			QRadioButton *btn = (QRadioButton*) layout->itemAt(i)->widget();
+			btn->setChecked(i==n);
+		}
+	}
+}
+
+void uiRadioButtonsOnSelected(uiRadioButtons *r, void (*f)(uiRadioButtons *, void *), void *data)
+{
+	qWarning("TODO uiRadioButtonsOnSelected");
+}
+
 void uiRadioButtonsAppend(uiRadioButtons *r, const char *text)
 {
 	if (auto layout = uiValidateAndCastObjTo<QLayout>(r)) {

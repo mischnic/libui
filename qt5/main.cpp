@@ -87,6 +87,11 @@ int uiMainStep(int wait)
 	return 0;
 }
 
+void uiMainSteps(void)
+{
+	// don't need to do anything here
+}
+
 void uiQuit(void)
 {
 	QTimer::singleShot(0,QApplication::instance(), &QApplication::quit);

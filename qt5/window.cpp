@@ -76,6 +76,22 @@ void uiWindowSetChild(uiWindow *w, uiControl *child)
 	}
 }
 
+int uiWindowFullscreen(uiWindow *w)
+{
+	if (auto window = uiValidateAndCastObjTo<WindowWidget>(w)) {
+		Qt::WindowStates state = window->windowState();
+		return state & Qt::WindowFullScreen;
+	}
+	return -1;
+}
+
+void uiWindowSetFullscreen(uiWindow *w, int fullscreen)
+{
+	if (auto window = uiValidateAndCastObjTo<WindowWidget>(w)) {
+		window->showFullScreen();
+	}
+}
+
 int uiWindowMargined(uiWindow *w)
 {
 	qWarning("TODO %p", (void*)w);
@@ -85,6 +101,39 @@ int uiWindowMargined(uiWindow *w)
 void uiWindowSetMargined(uiWindow *w, int margined)
 {
 	qWarning("TODO %p, %d", (void*)w, margined);
+}
+
+void uiWindowSetBorderless(uiWindow *w, int borderless)
+{
+	if (auto window = uiValidateAndCastObjTo<WindowWidget>(w)) {
+		if(borderless){
+			window->setWindowFlags(window->windowFlags() | Qt::CustomizeWindowHint | Qt::FramelessWindowHint);		
+		} else {
+			window->setWindowFlags(window->windowFlags() & ~Qt::CustomizeWindowHint & Qt::FramelessWindowHint);		
+		}
+	}
+}
+
+
+void uiWindowContentSize(uiWindow *w, int *width, int *height)
+{
+	if (auto window = uiValidateAndCastObjTo<WindowWidget>(w)) {
+		QSize size = window->size();
+		*width = size.width();
+		*height = size.height();
+	}
+}
+
+void uiWindowSetContentSize(uiWindow *w, int width, int height)
+{
+	if (auto window = uiValidateAndCastObjTo<WindowWidget>(w)) {
+		window->resize(width, height);
+	}
+}
+
+void uiWindowOnContentSizeChanged(uiWindow *w, void (*f)(uiWindow *, void *), void *data)
+{
+	qWarning("TODO uiWindowOnContentSizeChanged");
 }
 
 uiWindow *uiNewWindow(const char *title, int width, int height, int hasMenubar)

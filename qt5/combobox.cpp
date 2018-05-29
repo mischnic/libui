@@ -19,7 +19,7 @@ int uiComboboxSelected(uiCombobox *c)
 	return -1;
 }
 
-void uiComboboxSetSelected(uiCombobox *c, intmax_t n)
+void uiComboboxSetSelected(uiCombobox *c, int n)
 {
 	if (auto comboBox = uiValidateAndCastObjTo<QComboBox>(c)) {
 		comboBox->setCurrentIndex(n);

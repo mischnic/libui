@@ -27,7 +27,7 @@ void uiTabAppend(uiTab *t, const char *name, uiControl *child)
 	}
 }
 
-void uiTabInsertAt(uiTab *t, const char *name, uintmax_t n, uiControl *child)
+void uiTabInsertAt(uiTab *t, const char *name, int n, uiControl *child)
 {
 	if (auto tabWidget = uiValidateAndCastObjTo<QTabWidget>(t)) {
 		tabInsertAt(tabWidget,name,qBound<int>(0, n, tabWidget->count()),child);
@@ -35,11 +35,11 @@ void uiTabInsertAt(uiTab *t, const char *name, uintmax_t n, uiControl *child)
 }
 
 // reminder: badly named function, is remove not really a delete
-void uiTabDelete(uiTab *t, uintmax_t n)
+void uiTabDelete(uiTab *t, int n)
 {
 	if (auto tabWidget = uiValidateAndCastObjTo<QTabWidget>(t)) {
 		int i = qBound<int>(0, n, tabWidget->count());
-		if ((uintmax_t)i != n) {
+		if (i != n) {
 			qWarning("Bad index: %llu", (unsigned long long)n);
 			return;
 		}
@@ -66,7 +66,7 @@ int uiTabNumPages(uiTab *t)
 	return 0;
 }
 
-int uiTabMargined(uiTab *t, uintmax_t n)
+int uiTabMargined(uiTab *t, int n)
 {
 	qWarning("TODO %p, %d", (void*)t, (int)n);
 	return 0;

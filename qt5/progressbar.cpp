@@ -11,6 +11,14 @@ void uiProgressBarSetValue(uiProgressBar *p, int value)
 	}
 }
 
+int uiProgressBarValue(uiProgressBar *p)
+{
+	if (auto progressBar = uiValidateAndCastObjTo<QProgressBar>(p)) {
+		return progressBar->value();
+	}
+	return -1;
+}
+
 uiProgressBar *uiNewProgressBar(void)
 {
 	auto progressBar = new QProgressBar;

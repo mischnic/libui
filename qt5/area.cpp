@@ -152,6 +152,16 @@ void uiAreaScrollTo(uiArea *a, double x, double y, double width, double height)
 	qWarning("TODO: %p %f, %f, %f, %f", (void *)a, x, y, width, height);
 }
 
+void uiAreaBeginUserWindowMove(uiArea *a)
+{
+	qWarning("TODO: uiAreaBeginUserWindowMove");
+}
+
+void uiAreaBeginUserWindowResize(uiArea *a, uiWindowResizeEdge edge)
+{
+	qWarning("TODO: uiAreaBeginUserWindowResize");
+}
+
 uiArea *uiNewArea(uiAreaHandler *ah)
 {
 	auto area = new Area(ah);
@@ -162,7 +172,7 @@ uiArea *uiNewArea(uiAreaHandler *ah)
 	return uiAllocQt5ControlType(uiArea,area,uiQt5Control::DeleteControlOnQObjectFree);
 }
 
-uiArea *uiNewScrollingArea(uiAreaHandler *ah, intmax_t width, intmax_t height)
+uiArea *uiNewScrollingArea(uiAreaHandler *ah, int width, int height)
 {
 	auto area = new Area(ah);
 	area->setMinimumSize({(int)width,(int)height});
