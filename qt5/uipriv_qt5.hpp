@@ -7,7 +7,7 @@
 extern void uiprivInitAlloc(void);
 extern void uiprivUninitAlloc(void);
 
-const int marginAmount = 20;
+const int marginAmount = 15;
 
 // text
 class QString;

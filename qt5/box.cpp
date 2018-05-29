@@ -35,7 +35,7 @@ void uiBoxDelete(uiBox *b, int index)
 int uiBoxPadded(uiBox *b)
 {
 	if (auto layoutBox = uiValidateAndCastObjTo<QBoxLayout>(b)) {
-		layoutBox->spacing();
+		return layoutBox->spacing() > 0;
 	}
 	return 0;
 }
@@ -43,7 +43,11 @@ int uiBoxPadded(uiBox *b)
 void uiBoxSetPadded(uiBox *b, int padded)
 {
 	if (auto layoutBox = uiValidateAndCastObjTo<QBoxLayout>(b)) {
-		layoutBox->setSpacing(padded);
+		if(padded){
+			layoutBox->setSpacing(10);
+		} else {
+			layoutBox->setSpacing(0);
+		}
 	}
 }
 

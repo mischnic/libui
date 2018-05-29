@@ -102,21 +102,20 @@ void uiWindowSetFullscreen(uiWindow *w, int fullscreen)
 
 int uiWindowMargined(uiWindow *w)
 {
-	qWarning("TODO uiWindowMargined");
+	if (auto window = uiValidateAndCastObjTo<WindowWidget>(w)) {
+		QMargins s = window->contentsMargins();
+		return s.top() == marginAmount;
+	}
 	return 0;
 }
 
 void uiWindowSetMargined(uiWindow *w, int margined)
 {
-	qWarning("TODO uiWindowSetMargined %d", margined);
 	if (auto window = uiValidateAndCastObjTo<WindowWidget>(w)) {
-		if (window->centralWidget()) {
-			// if(margined){
-				// printf("%s\n", window->centralWidget()->metaObject()->className());
-				window->centralWidget()->setContentsMargins(100, 100, 100, 100);
-			// } else {
-			// 	window->centralWidget()->setContentsMargins(0, 0, 0, 0);
-			// }
+		if(margined){
+			window->setContentsMargins(marginAmount, marginAmount, marginAmount, marginAmount);
+		} else {
+			window->setContentsMargins(0, 0, 0, 0);
 		}
 	}
 }

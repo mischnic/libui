@@ -32,7 +32,6 @@ void uiGroupSetChild(uiGroup *g, uiControl *child)
 			groupBox->setLayout(layout);
 		} else if (auto widget = qobject_cast<QWidget*>(obj)) {
 			auto layout = new QVBoxLayout;
-			layout->setMargin(0); // ?
 			layout->addWidget(widget);
 			groupBox->setLayout(layout);
 		} else {
@@ -43,13 +42,26 @@ void uiGroupSetChild(uiGroup *g, uiControl *child)
 
 int uiGroupMargined(uiGroup *g)
 {
-	qWarning("TODO: %p", (void*)g);
+	// if (auto groupBox = uiValidateAndCastObjTo<QGroupBox>(g)) {
+	// 	if(groupBox->layout()) {
+	// 		return groupBox->layout()->getMargin() > 0;
+	// 	}
+	// }
+	qWarning("TODO");
 	return 0;
 }
 
 void uiGroupSetMargined(uiGroup *g, int margined)
 {
-	qWarning("TODO: %p, %d", (void*)g, margined);
+	if (auto groupBox = uiValidateAndCastObjTo<QGroupBox>(g)) {
+		if(groupBox->layout()) {
+			if(margined){
+				groupBox->layout()->setMargin(marginAmount);
+			} else {
+				groupBox->layout()->setMargin(0);
+			}
+		}
+	}
 }
 
 uiGroup *uiNewGroup(const char *text)
