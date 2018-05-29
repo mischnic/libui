@@ -28,6 +28,7 @@ void uiComboboxSetSelected(uiCombobox *c, int n)
 
 void uiComboboxOnSelected(uiCombobox *c, void (*f)(uiCombobox *c, void *data), void *data)
 {
+	//TODO gets called by setSelected
 	if (auto comboBox = uiValidateAndCastObjTo<QComboBox>(c)) {
 		// disambiguation of overloaded function
 		void (QComboBox:: *currentIndexChanged)(int) = &QComboBox::currentIndexChanged;

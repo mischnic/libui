@@ -22,7 +22,7 @@ void uiMsgBox(uiWindow *parent, const char *title, const char *description)
 
 void uiMsgBoxError(uiWindow *parent, const char *title, const char *description)
 {
-	QMessageBox::warning(uiValidateAndCastObjTo<QWidget>(parent),
+	QMessageBox::critical(uiValidateAndCastObjTo<QWidget>(parent),
 						 QString::fromUtf8(title),
 						 QString::fromUtf8(description));
 }

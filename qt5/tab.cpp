@@ -70,7 +70,7 @@ int uiTabMargined(uiTab *t, int n)
 {
 	if (auto tabWidget = uiValidateAndCastObjTo<QTabWidget>(t)) {
 		QMargins s = tabWidget->widget(n)->contentsMargins();
-		return s.top() == marginAmount;
+		return s.top() > 0;
 	}
 	return 0;
 }
@@ -79,7 +79,7 @@ void uiTabSetMargined(uiTab *t, int n, int margined)
 {
 	if (auto tabWidget = uiValidateAndCastObjTo<QTabWidget>(t)) {
 		if(margined){
-			tabWidget->widget(n)->setContentsMargins(marginAmount, marginAmount, marginAmount, marginAmount);		
+			tabWidget->widget(n)->setContentsMargins(marginAmount/10, marginAmount/10, marginAmount/10, marginAmount/10);		
 		} else{
 			tabWidget->widget(n)->setContentsMargins(0, 0, 0, 0);		
 		}

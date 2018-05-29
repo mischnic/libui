@@ -30,7 +30,7 @@ void uiRadioButtonsSetSelected(uiRadioButtons *r, int n)
 
 void uiRadioButtonsOnSelected(uiRadioButtons *r, void (*f)(uiRadioButtons *, void *), void *data)
 {
-	qWarning("TODO uiRadioButtonsOnSelected");
+	qWarning("TODO");
 }
 
 void uiRadioButtonsAppend(uiRadioButtons *r, const char *text)

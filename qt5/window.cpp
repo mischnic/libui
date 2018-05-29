@@ -46,7 +46,6 @@ void uiWindowSetTitle(uiWindow *w, const char *title)
 void uiWindowOnClosing(uiWindow *w, int (*f)(uiWindow *, void *), void *data)
 {
 	if (auto window = uiValidateAndCastObjTo<WindowWidget>(w)) {
-
 		if (f) {
 			window->onClosing = [f, w, data](QCloseEvent *event){
 				if (f(w,data)) {
@@ -55,7 +54,9 @@ void uiWindowOnClosing(uiWindow *w, int (*f)(uiWindow *, void *), void *data)
 					// setAttribute(Qt::WA_DeleteOnClose, true)
 					// but we need to behave consistently
 					event->accept();
-					w->Destroy(w);
+
+					// TODO: segfaults:
+					// w->Destroy(w);
 				}
 			};
 		} else {

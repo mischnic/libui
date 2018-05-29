@@ -8,15 +8,15 @@ struct uiForm : public uiQt5Control {};
 
 void uiFormAppend(uiForm *f, const char *label, uiControl *c, int stretchy)
 {
-	qWarning("TODO handle stretchy?");
+	qWarning("TODO handle stretchy");
 
 	if (auto layoutForm = uiValidateAndCastObjTo<QFormLayout>(f)) {
 		auto obj = uiValidateAndCastObjTo<QObject>(c);
 
 		if (auto layout = qobject_cast<QLayout*>(obj)) {
-			layoutForm->addRow(new QLabel(label), layout);
+			layoutForm->addRow(new QLabel(QString::fromUtf8(label)), layout);
 		} else if (auto widget = qobject_cast<QWidget*>(obj)) {
-			layoutForm->addRow(new QLabel(label), widget);
+			layoutForm->addRow(new QLabel(QString::fromUtf8(label)), widget);
 		} else {
 			qWarning("object is neither layout nor widget");
 		}

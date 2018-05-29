@@ -93,7 +93,7 @@ void uiMainSteps(void)
 
 void uiQuit(void)
 {
-	QTimer::singleShot(0,QApplication::instance(), &QApplication::quit);
+	QTimer::singleShot(0, QApplication::instance(), &QApplication::quit);
 }
 
 void uiQueueMain(void (*f)(void *data), void *data)

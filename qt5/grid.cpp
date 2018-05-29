@@ -1,7 +1,7 @@
 // 8 june 2016
 #include "uipriv_qt5.hpp"
 #include <QGridLayout>
-#include <QLabel>
+#include <QWidget>
 
 struct uiGrid : public uiQt5Control {};
 

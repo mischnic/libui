@@ -143,7 +143,7 @@ void uiAreaSetSize(uiArea *a, intmax_t width, intmax_t height)
 void uiAreaQueueRedrawAll(uiArea *a)
 {
 	if (auto area = findArea(a)) {
-		area->update();;
+		area->update();
 	}
 }
 
@@ -154,12 +154,15 @@ void uiAreaScrollTo(uiArea *a, double x, double y, double width, double height)
 
 void uiAreaBeginUserWindowMove(uiArea *a)
 {
-	qWarning("TODO: uiAreaBeginUserWindowMove");
+	qWarning("TODO");
+	// if (auto area = findArea(a)) {
+	// 	area->window()->move(0, 0);
+	// }
 }
 
 void uiAreaBeginUserWindowResize(uiArea *a, uiWindowResizeEdge edge)
 {
-	qWarning("TODO: uiAreaBeginUserWindowResize");
+	qWarning("TODO");
 }
 
 uiArea *uiNewArea(uiAreaHandler *ah)
@@ -167,7 +170,7 @@ uiArea *uiNewArea(uiAreaHandler *ah)
 	auto area = new Area(ah);
 
 	// The widget should get as much space as possible.
-	area->setSizePolicy({QSizePolicy::MinimumExpanding,QSizePolicy::MinimumExpanding});
+	area->setSizePolicy({QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding});
 
 	return uiAllocQt5ControlType(uiArea,area,uiQt5Control::DeleteControlOnQObjectFree);
 }
