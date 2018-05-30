@@ -145,7 +145,7 @@ void uiQueueMain(void (*f)(void *data), void *data)
 void uiTimer(int milliseconds, int (*f)(void* data), void* data)
 {
     QTimer *timer = new QTimer(QCoreApplication::instance());
-    QObject::connect(timer, &QTimer::timeout, [f, data, timer]() {
+    QObject::connect(timer, &QTimer::timeout, timer, [f, data, timer]() {
         if (!(f(data))) {
             timer->stop();
         }

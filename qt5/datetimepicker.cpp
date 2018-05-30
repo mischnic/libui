@@ -11,7 +11,7 @@ struct uiDateTimePicker : public uiQt5Control {};
 void dateTimeTotm(QDateTime *datetime, struct tm *t){
 	QDate date = datetime->date();
 	QTime time = datetime->time();
-	t->tm_year = date.year();
+	t->tm_year = date.year() - 1900;
 	t->tm_mon = date.month();
 	t->tm_mday = date.day();
 	t->tm_hour = time.hour();
@@ -30,10 +30,11 @@ void uiDateTimePickerSetTime(uiDateTimePicker *d, const struct tm *time)
 
 void uiDateTimePickerOnChanged(uiDateTimePicker *d, void (*f)(uiDateTimePicker *, void *), void *data)
 {
-	qWarning("TODO uiDateTimePickerOnChanged");
-	// if (auto control = uiValidateAndCastObjTo<QDateTimeEdit>(d)) {
-	// 
-	// }
+	if (auto control = uiValidateAndCastObjTo<QDateTimeEdit>(d)) {
+		QObject::connect(control, &QDateTimeEdit::dateTimeChanged, control, [f,d,data]{
+			f(d, data);
+		}, Qt::UniqueConnection);
+	}
 }
 
 void uiDateTimePickerTime(uiDateTimePicker *d, struct tm *t)
@@ -47,7 +48,7 @@ void uiDateTimePickerTime(uiDateTimePicker *d, struct tm *t)
 
 uiDateTimePicker *uiNewDateTimePicker(void)
 {
-	auto dateEdit = new QDateEdit(QDate::currentDate());
+	auto dateEdit = new QDateTimeEdit(QDateTime::currentDateTime());
 
 	// note styling is being set in main.cpp -> styleSheet
 
@@ -56,7 +57,7 @@ uiDateTimePicker *uiNewDateTimePicker(void)
 
 uiDateTimePicker *uiNewDatePicker(void)
 {
-	auto timeEdit = new QTimeEdit(QTime::currentTime());
+	auto timeEdit = new QDateEdit(QDate::currentDate());
 
 	// note styling is being set in main.cpp -> styleSheet
 
@@ -65,7 +66,7 @@ uiDateTimePicker *uiNewDatePicker(void)
 
 uiDateTimePicker *uiNewTimePicker(void)
 {
-	auto dateTimeEdit = new QDateTimeEdit(QDateTime::currentDateTime());
+	auto dateTimeEdit = new QTimeEdit(QTime::currentTime());
 
 	// note styling is being set in main.cpp -> styleSheet
 

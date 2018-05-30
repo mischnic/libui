@@ -8,8 +8,6 @@ struct uiForm : public uiQt5Control {};
 
 void uiFormAppend(uiForm *f, const char *label, uiControl *c, int stretchy)
 {
-	qWarning("TODO handle stretchy");
-
 	if (auto layoutForm = uiValidateAndCastObjTo<QFormLayout>(f)) {
 		auto obj = uiValidateAndCastObjTo<QObject>(c);
 
