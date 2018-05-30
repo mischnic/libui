@@ -20,35 +20,35 @@ static void t2m(const QTransform &t, uiDrawMatrix *m)
 void uiDrawMatrixTranslate(uiDrawMatrix *m, double x, double y)
 {
 	auto t = m2t(m);
-	t.translate(x,y);
-	t2m(t,m);
+	t.translate(x, y);
+	t2m(t, m);
 }
 
 void uiDrawMatrixScale(uiDrawMatrix *m, double xCenter, double yCenter, double x, double y)
 {
 	auto t = m2t(m);
-	t.translate(x,y);
-	t.scale(x,y);
-	t.translate(-x,-y);
-	t2m(t,m);
+	t.translate(x, y);
+	t.scale(x, y);
+	t.translate(-x, -y);
+	t2m(t, m);
 }
 
 void uiDrawMatrixRotate(uiDrawMatrix *m, double x, double y, double amount)
 {
 	auto t = m2t(m);
-	t.translate(x,y);
+	t.translate(x, y);
 	t.rotateRadians(amount);
-	t.translate(-x,-y);
-	t2m(t,m);
+	t.translate(-x, -y);
+	t2m(t, m);
 }
 
 void uiDrawMatrixSkew(uiDrawMatrix *m, double x, double y, double xamount, double yamount)
 {
 	auto t = m2t(m);
-	t.translate(x,y);
+	t.translate(x, y);
 	t.shear(xamount, yamount);
-	t.translate(-x,-y);
-	t2m(t,m);
+	t.translate(-x, -y);
+	t2m(t, m);
 }
 
 void uiDrawMatrixMultiply(uiDrawMatrix *dest, uiDrawMatrix *src)
@@ -70,7 +70,11 @@ int uiDrawMatrixInvert(uiDrawMatrix *m)
 
 void uiDrawMatrixTransformPoint(uiDrawMatrix *m, double *x, double *y)
 {
-	qWarning("TODO: %p, %f %f", (void *)m, *x, *y);
+	auto t = m2t(m);
+	QPointF p(*x, *y);
+	QPointF p2 = t.map(p);
+	*x = p2.x();
+	*y = p2.y();
 }
 
 void uiDrawMatrixTransformSize(uiDrawMatrix *m, double *x, double *y)

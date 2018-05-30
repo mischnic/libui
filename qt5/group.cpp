@@ -42,12 +42,11 @@ void uiGroupSetChild(uiGroup *g, uiControl *child)
 
 int uiGroupMargined(uiGroup *g)
 {
-	// if (auto groupBox = uiValidateAndCastObjTo<QGroupBox>(g)) {
-	// 	if(groupBox->layout()) {
-	// 		return groupBox->layout()->getMargin() > 0;
-	// 	}
-	// }
-	qWarning("TODO");
+	if (auto groupBox = uiValidateAndCastObjTo<QGroupBox>(g)) {
+		if(groupBox->layout()) {
+			return groupBox->layout()->margin() > 0;
+		}
+	}
 	return 0;
 }
 

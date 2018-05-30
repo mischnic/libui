@@ -8,7 +8,7 @@ struct uiGrid : public uiQt5Control {};
 
 void uiGridAppend(uiGrid *g, uiControl *c, int left, int top, int xspan, int yspan, int hexpand, uiAlign halign, int vexpand, uiAlign valign)
 {
-	qWarning("TODO params: hexpand, vexpand");
+	qWarning("TODO hexpand vexpand");
 
 	if (auto layoutGrid = uiValidateAndCastObjTo<QGridLayout>(g)) {
 		auto obj = uiValidateAndCastObjTo<QObject>(c);
@@ -43,10 +43,17 @@ void uiGridAppend(uiGrid *g, uiControl *c, int left, int top, int xspan, int ysp
 				break;
 		}
 
+		if(vexpand){
+			yspan = -1;
+		}
+		if(hexpand){
+			xspan = -1;
+		}
+
 		if (auto layout = qobject_cast<QLayout*>(obj)) {
-			layoutGrid->addLayout(layout, top, left, xspan, yspan, alignH | alignV);
+			layoutGrid->addLayout(layout, top, left, yspan, xspan, alignH | alignV);
 		} else if (auto widget = qobject_cast<QWidget*>(obj)) {
-			layoutGrid->addWidget(widget, top, left, xspan, yspan, alignH | alignV);
+			layoutGrid->addWidget(widget, top, left, yspan, xspan, alignH | alignV);
 		} else {
 			qWarning("object is neither layout nor widget");
 		}
@@ -70,18 +77,30 @@ void uiGridInsertAt(uiGrid *g, uiControl *c, uiControl *existing, uiAt at, int x
 
 int uiGridPadded(uiGrid *g)
 {
-	qWarning("TODO");
+	if (auto layoutGrid = uiValidateAndCastObjTo<QGridLayout>(g)) {
+		return layoutGrid->horizontalSpacing() > 0;
+	}
 	return 0;
 }
 
 void uiGridSetPadded(uiGrid *g, int padded)
 {
-	qWarning("TODO");
+	if (auto layoutGrid = uiValidateAndCastObjTo<QGridLayout>(g)) {
+		if(padded){
+			layoutGrid->setHorizontalSpacing(10);
+			layoutGrid->setVerticalSpacing(10);
+		} else {
+			layoutGrid->setHorizontalSpacing(0);
+			layoutGrid->setVerticalSpacing(0);
+		}
+	}
 }
 
 uiGrid *uiNewGrid(void)
 {
-    QGridLayout *layout = new QGridLayout();
+	QGridLayout *layout = new QGridLayout();
+	layout->setHorizontalSpacing(0);
+	layout->setVerticalSpacing(0);
 
-    return uiAllocQt5ControlType(uiGrid, layout, uiQt5Control::DeleteControlOnQObjectFree);
+	return uiAllocQt5ControlType(uiGrid, layout, uiQt5Control::DeleteControlOnQObjectFree);
 }

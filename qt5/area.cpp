@@ -4,10 +4,28 @@
 
 #include <QScrollArea>
 #include <QPaintEvent>
+#include <QGuiApplication>
 
 #include <QDebug> // TODO: remove
 
 struct uiArea : public uiQt5Control {};
+
+static int translateModifiers(Qt::KeyboardModifiers k){
+	int result = 0;
+	if(k & Qt::ShiftModifier){
+		result |= uiModifierShift;
+	}
+	if(k & Qt::ControlModifier){
+		result |= uiModifierCtrl;
+	}
+	if(k & Qt::AltModifier){
+		result |= uiModifierAlt;
+	}
+	if(k & Qt::MetaModifier){
+		result |= uiModifierSuper;
+	}
+	return result;
+}
 
 class Area : public QWidget
 {
@@ -92,14 +110,14 @@ private:
 		me.AreaWidth = width();
 		me.AreaHeight = height();
 
-		// TODO: at a glance these are not tested nor well defined..?
-		me.Down = 0; // TODO
-		me.Up = 0; // TODO
-		me.Count = 0; // TODO
-		me.Modifiers = 0; // TODO
-		me.Held1To64 = 0; // TODO
+		// TODO test
+		me.Down = (mouseEvent->type() == QEvent::MouseButtonPress) ? mouseEvent->button() : 0;
+		me.Up =  (mouseEvent->type() == QEvent::MouseButtonRelease) ? mouseEvent->button() : 0;
+		me.Count = (mouseEvent->type() == QEvent::MouseButtonDblClick) ? 2 : 1;
+		me.Modifiers = translateModifiers(QGuiApplication::keyboardModifiers());
+		me.Held1To64 = mouseEvent->buttons();
 
-		ah_->MouseEvent(ah_,static_cast<uiArea*>(uiFindQt5ControlForQObject(this)),&me);
+		ah_->MouseEvent(ah_, static_cast<uiArea*>(uiFindQt5ControlForQObject(this)), &me);
 	}
 
 	void keyPressEvent(QKeyEvent *keyEvent)  { translateKeyEvent(keyEvent); }
@@ -114,7 +132,7 @@ private:
 		ke.Key = keyEvent->key();
 		ke.ExtKey = 0;
 		ke.Modifier = 0;
-		ke.Modifiers = 0;
+		ke.Modifiers = translateModifiers(QGuiApplication::keyboardModifiers());
 		ke.Up = (keyEvent->type() == QEvent::KeyRelease);
 
 		ah_->KeyEvent(ah_,static_cast<uiArea*>(uiFindQt5ControlForQObject(this)),&ke);
