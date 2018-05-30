@@ -17,7 +17,6 @@ cmake_minimum_required(VERSION 3.1.0 FATAL_ERROR)
 # TODO figure out if FORCE is needed here
 # TODO figure out whether STRING "" is best or if something else is better; also what FORCE does because I forget and later I say it's needed
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.8" CACHE STRING "" FORCE)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 
 # we want to disable incremental linking
 # see also:
@@ -51,6 +50,7 @@ if(APPLE)
 	# the / is required by some older versions of OS X
 	set(CMAKE_INSTALL_RPATH "@executable_path/")
 	set(CMAKE_MACOSX_RPATH TRUE)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -stdlib=libc++")
 elseif(WIN32)
 	set(_OSNAME windows)
 
