@@ -16,6 +16,17 @@ void uiFormAppend(uiForm *f, const char *label, uiControl *c, int stretchy)
 		if (auto layout = qobject_cast<QLayout*>(obj)) {
 			layoutForm->addRow(new QLabel(QString::fromUtf8(label)), layout);
 		} else if (auto widget = qobject_cast<QWidget*>(obj)) {
+			QSizePolicy sp;
+			if(stretchy){
+				widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+				sp = widget->sizePolicy();
+				sp.setVerticalStretch(1);
+			} else {
+				widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+				sp = widget->sizePolicy();
+			}
+			sp.setHorizontalStretch(1);
+			widget->setSizePolicy(sp);
 			layoutForm->addRow(new QLabel(QString::fromUtf8(label)), widget);
 		} else {
 			qWarning("object is neither layout nor widget");
@@ -54,6 +65,7 @@ void uiFormSetPadded(uiForm *f, int padded)
 uiForm *uiNewForm(void)
 {
     QFormLayout *layout = new QFormLayout();
+    layout->setFieldGrowthPolicy(QFormLayout::ExpandingFieldsGrow);
 
     return uiAllocQt5ControlType(uiForm, layout, uiQt5Control::DeleteControlOnQObjectFree);
 }

@@ -16,6 +16,19 @@ void uiBoxAppend(uiBox *b, uiControl *c, int stretchy)
 		if (auto layout = qobject_cast<QLayout*>(obj)) {
 			layoutBox->addLayout(layout, stretchy);
 		} else if (auto widget = qobject_cast<QWidget*>(obj)) {
+			if(stretchy){
+				if(layoutBox->alignment() == Qt::AlignTop){
+					widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
+				} else {
+					widget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+				}
+			} else {
+				if(layoutBox->alignment() == Qt::AlignTop){
+					widget->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+				} else {
+					widget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+				}
+			}
 			layoutBox->addWidget(widget);
 		} else {
 			qWarning("object is neither layout nor widget");
@@ -53,12 +66,15 @@ void uiBoxSetPadded(uiBox *b, int padded)
 
 uiBox *uiNewHorizontalBox(void)
 {
-	return uiAllocQt5ControlType(uiBox, new QHBoxLayout, uiQt5Control::DeleteControlOnQObjectFree);
+	auto layout = new QHBoxLayout();
+	layout->setAlignment(Qt::AlignLeft);
+
+	return uiAllocQt5ControlType(uiBox, layout, uiQt5Control::DeleteControlOnQObjectFree);
 }
 
 uiBox *uiNewVerticalBox(void)
 {
-	auto layout = new QVBoxLayout;
+	auto layout = new QVBoxLayout();
 	layout->setAlignment(Qt::AlignTop);
 
 	return uiAllocQt5ControlType(uiBox, layout, uiQt5Control::DeleteControlOnQObjectFree);
