@@ -109,9 +109,10 @@ extern int uiprivSendAreaEvents(NSEvent *);
 
 // areacommon.m
 @interface uiprivAreaCommonView : NSView {
+	NSSize libui_ss;
 	BOOL libui_enabled;
 }
-- (void)setArea:(uiArea *)a;
+- (id)initWithFrame:(NSRect)r area:(uiArea *)a;
 - (uiModifiers)parseModifiers:(NSEvent *)e;
 - (void)doMouseEvent:(NSEvent *)e;
 - (int)sendKeyEvent:(uiAreaKeyEvent *)ke;
@@ -122,6 +123,7 @@ extern int uiprivSendAreaEvents(NSEvent *);
 - (void)setupNewTrackingArea;
 - (BOOL)isEnabled;
 - (void)setEnabled:(BOOL)e;
+- (void)setScrollingSize:(NSSize)s;
 @end
 
 // areaevents.m

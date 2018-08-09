@@ -16,6 +16,8 @@
 #define SLOW_ROTATION_SPEED		2.0f
 #define FAST_ROTATION_SPEED		5.0f
 
+const int SIZE = 500;
+
 #define GLCall(x) GLClearError(); x; GLLogCall(#x, __FILE__, __LINE__);
 
 static void GLClearError() {
@@ -113,9 +115,8 @@ static float rotationAngle = 0.0f;
 
 static void onMouseEvent(uiOpenGLAreaHandler *h, uiOpenGLArea *a, uiAreaMouseEvent *e)
 {
-	printf("onMouseEvent\n");
-	double width;
-	uiOpenGLAreaGetSize(a, &width, NULL);
+	// printf("onMouseEvent\n");
+	double width = SIZE;
 
 	rotationAngle = (uiPi * 2.0f) * (e->X / width);
 	// rotationAngle += 2.0f / 180.0f * uiPi;
@@ -124,23 +125,23 @@ static void onMouseEvent(uiOpenGLAreaHandler *h, uiOpenGLArea *a, uiAreaMouseEve
 
 static void onMouseCrossed(uiOpenGLAreaHandler *h, uiOpenGLArea *a, int left)
 {
-	printf("onMouseCrossed\n");
+	// printf("onMouseCrossed\n");
 }
 
 static void onDragBroken(uiOpenGLAreaHandler *h, uiOpenGLArea *a)
 {
-	printf("onDragBroken\n");
+	// printf("onDragBroken\n");
 }
 
 static int onKeyEvent(uiOpenGLAreaHandler *h, uiOpenGLArea *a, uiAreaKeyEvent *e)
 {
-	printf("onKeyEvent\n");
+	// printf("onKeyEvent\n");
 	return 0;
 }
 
 static void onInitGL(uiOpenGLAreaHandler *h, uiOpenGLArea *a)
 {
-	printf("Init\n");
+	// printf("Init\n");
 	GLCall(glGenBuffers(1, &openGLState.VBO));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, openGLState.VBO));
 	GLCall(glBufferData(GL_ARRAY_BUFFER, sizeof(VERTICES), VERTICES, GL_STATIC_DRAW));
@@ -177,9 +178,9 @@ static void onInitGL(uiOpenGLAreaHandler *h, uiOpenGLArea *a)
 
 static void onDrawGL(uiOpenGLAreaHandler *h, uiOpenGLArea *a, double width, double height)
 {
-	GLCall(glViewport(0, 0, width, height));
+	GLCall(glViewport(0, 0, SIZE, SIZE));
 
-	GLCall(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
+	GLCall(glClearColor(0.5f, 0.0f, 0.0f, 1.0f));
 	GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 	GLCall(glUseProgram(openGLState.Program));
 
@@ -190,7 +191,7 @@ static void onDrawGL(uiOpenGLAreaHandler *h, uiOpenGLArea *a, double width, doub
 	GLCall(glVertexAttribPointer(openGLState.ColorAttrib, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(Vertex), (const GLvoid *)offsetof(Vertex, r)));
 
 	Matrix4 projection = perspective(45.0f / 180.0f * uiPi,
-									 (float)width / (float)height,
+									 (float)SIZE / (float)SIZE,
 									 0.1f,
 									 100.0f);
 	GLCall(glUniformMatrix4fv(openGLState.ProjectionUniform, 1, GL_FALSE, &projection.m11));
@@ -200,7 +201,7 @@ static void onDrawGL(uiOpenGLAreaHandler *h, uiOpenGLArea *a, double width, doub
 
 	GLCall(glDrawArrays(GL_TRIANGLES, 0, 3));
 	uiOpenGLAreaSwapBuffers(a);
-	printf("drawing\n");
+	// printf("drawing\n");
 }
 
 static uiOpenGLAreaHandler AREA_HANDLER = {
@@ -230,7 +231,7 @@ int main(void)
 	uiInitOptions o = { 0 };
 	const char *err = uiInit(&o);
 	if (err != NULL) {
-		fprintf(stderr, "error initializing ui: %s\n", err);
+		// fprintf(stderr, "error initializing ui: %s\n", err);
 		uiFreeInitError(err);
 		return 1;
 	}
@@ -246,7 +247,8 @@ int main(void)
 	uiBox *b = uiNewHorizontalBox();
 	uiWindowSetChild(mainwin, uiControl(b));
 
-	uiOpenGLArea *glarea = uiNewOpenGLArea(&AREA_HANDLER, attribs);
+	// uiOpenGLArea *glarea = uiNewOpenGLArea(&AREA_HANDLER, attribs);
+	uiOpenGLArea *glarea = uiNewScrollingOpenGLArea(&AREA_HANDLER, attribs, SIZE, SIZE);
 	uiBoxAppend(b, uiControl(glarea), 1);
 
 	uiControlShow(uiControl(mainwin));

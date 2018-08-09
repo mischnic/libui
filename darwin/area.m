@@ -6,21 +6,20 @@
 
 @interface areaView : uiprivAreaCommonView {
 	uiArea *libui_a;
-	NSSize libui_ss;
 }
 - (id)initWithFrame:(NSRect)r area:(uiArea *)a;
-- (void)setScrollingSize:(NSSize)s;
 @end
 
 struct uiArea {
 	uiDarwinControl c;
 	NSView *view;			// either sv or area depending on whether it is scrolling
 	uiAreaHandler *ah;
+	NSScrollView *sv;
 	NSEvent *dragevent;
 	BOOL scrolling;
-	NSScrollView *sv;
-	areaView *area;
 	uiprivScrollViewData *d;
+	
+	areaView *area;
 };
 
 @implementation areaView
@@ -30,10 +29,6 @@ struct uiArea {
 	self = [super initWithFrame:r];
 	if (self) {
 		self->libui_a = a;
-		[self setArea:a];
-		[self setupNewTrackingArea];
-		self->libui_ss = r.size;
-		self->libui_enabled = YES;
 	}
 	return self;
 }
@@ -64,19 +59,6 @@ struct uiArea {
 	(*(a->ah->Draw))(a->ah, a, &dp);
 
 	uiprivDrawFreeContext(dp.Context);
-}
-
-- (void)setScrollingSize:(NSSize)s
-{
-	self->libui_ss = s;
-	[self setFrameSize:s];
-}
-
-- (NSSize)intrinsicContentSize
-{
-	if (!self->libui_a->scrolling)
-		return [super intrinsicContentSize];
-	return self->libui_ss;
 }
 
 @end

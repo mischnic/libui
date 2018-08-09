@@ -6,11 +6,12 @@
 // incomplete type only with needed member, same layout for uiArea and uiOpenGLArea
 struct uiArea {
 	uiDarwinControl c;
-	NSView *view;
+	NSView *view;			// either sv or area depending on whether it is scrolling
 	uiAreaHandler *ah;
+	NSScrollView *sv;
 	NSEvent *dragevent;
 	BOOL scrolling;
-	// ...
+	uiprivScrollViewData *d;
 };
 
 @implementation uiprivAreaCommonView {
@@ -18,9 +19,17 @@ struct uiArea {
 	NSTrackingArea *libui_ta;
 }
 
-- (void)setArea:(uiArea *)a
+- (id)initWithFrame:(NSRect)r area:(uiArea *)a
 {
-	self->area = a;
+	self = [super initWithFrame:r];
+	if (self) {
+		self->area = a;
+		[self setupNewTrackingArea];
+		self->libui_ss = r.size;
+		self->libui_enabled = YES;
+	}
+
+	return self;
 }
 
 // capture on drag is done automatically on OS X
@@ -215,8 +224,6 @@ mouseEvent(otherMouseUp)
 	return [self doKeyDownUp:e up:1];
 }
 
-
-
 - (void)setupNewTrackingArea
 {
 	self->libui_ta = [[NSTrackingArea alloc] initWithRect:[self bounds]
@@ -273,6 +280,19 @@ mouseEvent(otherMouseUp)
 	if (!a->scrolling)
 		// we must redraw everything on resize because Windows requires it
 		[self setNeedsDisplay:YES];
+}
+
+- (void)setScrollingSize:(NSSize)s
+{
+	self->libui_ss = s;
+	[self setFrameSize:s];
+}
+
+- (NSSize)intrinsicContentSize
+{
+	if (!self->area->scrolling)
+		return [super intrinsicContentSize];
+	return self->libui_ss;
 }
 
 @end

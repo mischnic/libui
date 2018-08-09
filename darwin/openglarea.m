@@ -1,11 +1,12 @@
+// 9 september 2015
 #import "uipriv_darwin.h"
 
+// 10.8 fixups
 #define NSEventModifierFlags NSUInteger
 
 @interface openGLAreaView : uiprivAreaCommonView {
 	uiOpenGLArea *libui_a;
 }
-
 - (id)initWithFrame:(NSRect)r area:(uiOpenGLArea *)a attributes:(uiOpenGLAttributes *)attribs;
 @end
 
@@ -13,14 +14,21 @@
 
 struct uiOpenGLArea {
 	uiDarwinControl c;
-	openGLAreaView *view;
+	NSView *view;			// either sv or area depending on whether it is scrolling
 	uiOpenGLAreaHandler *ah;
+	NSScrollView *sv;
 	NSEvent *dragevent;
 	BOOL scrolling;
+	uiprivScrollViewData *d;
+	
+	openGLAreaView *area;
+
 	NSOpenGLPixelFormat *pixFmt;
 	NSOpenGLContext *ctx;
 	BOOL initialized;
 };
+
+@implementation openGLAreaView
 
 // This functionality is wrapped up here to guard against buffer overflows in the attribute list.
 static void assignNextPixelFormatAttribute(NSOpenGLPixelFormatAttribute *as, unsigned int *ai, NSOpenGLPixelFormatAttribute a)
@@ -31,17 +39,11 @@ static void assignNextPixelFormatAttribute(NSOpenGLPixelFormatAttribute *as, uns
 	(*ai)++;
 }
 
-@implementation openGLAreaView
-
 - (id)initWithFrame:(NSRect)r area:(uiOpenGLArea *)a attributes:(uiOpenGLAttributes *)attribs
 {
-	self = [super initWithFrame:r];
+	self = [super initWithFrame:r area:(uiArea *)a];
 	if (self) {
 		self->libui_a = a;
-		[self setArea:(uiArea *)a];
-		[self setupNewTrackingArea];
-		self->libui_enabled = YES;
-
 		NSOpenGLPixelFormatAttribute attrs[ATTRIBUTE_LIST_SIZE];
 		unsigned int attrIndex = 0;
 		assignNextPixelFormatAttribute(attrs, &attrIndex, NSOpenGLPFAColorSize);
@@ -78,14 +80,15 @@ static void assignNextPixelFormatAttribute(NSOpenGLPixelFormatAttribute *as, uns
 		if(self->libui_a->ctx == nil)
 			uiprivUserBug("Couldn't create OpenGL context!");
 
-		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewBoundsDidChange:) name:NSViewFrameDidChangeNotification object:self];
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(viewBoundsDidChange:) name:NSViewFrameDidChangeNotification object:self->libui_a->area];
 	}
 	return self;
 }
 
 - (void)viewBoundsDidChange:(NSNotification *)notification
 {
-	[self->libui_a->ctx setView:self];
+	NSLog(@"%@", self->libui_a->area);
+	[self->libui_a->ctx setView:self->libui_a->area];
 	[self->libui_a->ctx update];
 }
 
@@ -94,14 +97,14 @@ static void assignNextPixelFormatAttribute(NSOpenGLPixelFormatAttribute *as, uns
 	uiOpenGLArea *a = self->libui_a;
 	uiOpenGLAreaMakeCurrent(a);
 
-	double width = [self frame].size.width;
-	double height = [self frame].size.height;
+	// NSSize s = a->scrolling ? [[a->sv documentView] frame].size : [self frame].size;
+	NSSize s = a->scrolling ? NSZeroSize : [self frame].size;
 
 	if (!a->initialized) {
 		(*(a->ah->InitGL))(a->ah, a);
 		a->initialized = YES;
 	}
-	(*(a->ah->DrawGL))(a->ah, a, width, height);
+	(*(a->ah->DrawGL))(a->ah, a, s.width, s.height);
 }
 
 @end
@@ -112,19 +115,30 @@ static void uiOpenGLAreaDestroy(uiControl *c)
 {
 	uiOpenGLArea *a = uiOpenGLArea(c);
 
-	[a->view release];
+	if (a->scrolling)
+		uiprivScrollViewFreeData(a->sv, a->d);
+	[a->area release];
+	if (a->scrolling)
+		[a->sv release];
+
 	[a->ctx release];
 	[a->pixFmt release];
 	uiFreeControl(uiControl(a));
 }
 
-void uiOpenGLAreaGetSize(uiOpenGLArea *a, double *width, double *height)
+void uiOpenGLAreaSetSize(uiOpenGLArea *a, int width, int height)
 {
-	NSRect rect = [a->view frame];
-	if(width != NULL)
-		*width = rect.size.width;
-	if(height != NULL)
-		*height = rect.size.height;
+	if (!a->scrolling)
+		uiprivUserBug("You cannot call uiOpenGLAreaSetSize() on a non-scrolling uiOpenGLArea. (area: %p)", a);
+	[a->area setScrollingSize:NSMakeSize(width, height)];
+}
+
+void uiOpenGLAreaScrollTo(uiOpenGLArea *a, double x, double y, double width, double height)
+{
+	if (!a->scrolling)
+		uiprivUserBug("You cannot call uiOpenGLAreaScrollTo() on a non-scrolling uiOpenGLArea. (area: %p)", a);
+	[a->area scrollRectToVisible:NSMakeRect(x, y, width, height)];
+	// don't worry about the return value; it just says whether scrolling was needed
 }
 
 void uiOpenGLAreaSetVSync(uiOpenGLArea *a, int si)
@@ -134,7 +148,7 @@ void uiOpenGLAreaSetVSync(uiOpenGLArea *a, int si)
 
 void uiOpenGLAreaQueueRedrawAll(uiOpenGLArea *a)
 {
-	[a->view setNeedsDisplay:YES];
+	[a->area setNeedsDisplay:YES];
 }
 
 void uiOpenGLAreaMakeCurrent(uiOpenGLArea *a)
@@ -150,10 +164,47 @@ void uiOpenGLAreaSwapBuffers(uiOpenGLArea *a)
 uiOpenGLArea *uiNewOpenGLArea(uiOpenGLAreaHandler *ah, uiOpenGLAttributes *attribs)
 {
 	uiOpenGLArea *a;
+
 	uiDarwinNewControl(uiOpenGLArea, a);
-	a->initialized = NO;
-	a->scrolling = NO;
+
 	a->ah = ah;
-	a->view = [[openGLAreaView alloc] initWithFrame:NSZeroRect area:a attributes:attribs];
+	a->scrolling = NO;
+
+	a->area = [[openGLAreaView alloc] initWithFrame:NSZeroRect area:a attributes:attribs];
+
+	a->view = a->area;
+
+	return a;
+}
+
+uiOpenGLArea *uiNewScrollingOpenGLArea(uiOpenGLAreaHandler *ah, uiOpenGLAttributes *attribs, int width, int height)
+{
+	uiOpenGLArea *a;
+	uiprivScrollViewCreateParams p;
+
+	uiDarwinNewControl(uiOpenGLArea, a);
+
+	a->ah = ah;
+	a->scrolling = YES;
+
+	a->area = [[openGLAreaView alloc] initWithFrame:NSMakeRect(0, 0, width, height)
+		area:a attributes:attribs];
+
+
+
+	memset(&p, 0, sizeof (uiprivScrollViewCreateParams));
+	p.DocumentView = a->area;
+	p.BackgroundColor = [NSColor controlColor];
+	p.DrawsBackground = 1;
+	p.Bordered = NO;
+	p.HScroll = YES;
+	p.VScroll = YES;
+	a->sv = uiprivMkScrollView(&p, &(a->d));
+
+	[[a->sv contentView] setPostsBoundsChangedNotifications:YES];
+	[[NSNotificationCenter defaultCenter] addObserver:a->area selector:@selector(viewBoundsDidChange:) name:NSViewBoundsDidChangeNotification object:[a->sv contentView]]; 
+
+	a->view = a->sv;
+
 	return a;
 }

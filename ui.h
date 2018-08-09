@@ -1476,6 +1476,7 @@ _UI_EXTERN void uiOpenGLAreaQueueRedrawAll(uiOpenGLArea *a);
 _UI_EXTERN void uiOpenGLAreaMakeCurrent(uiOpenGLArea *a);
 _UI_EXTERN void uiOpenGLAreaSwapBuffers(uiOpenGLArea *a);
 _UI_EXTERN uiOpenGLArea *uiNewOpenGLArea(uiOpenGLAreaHandler *ah, uiOpenGLAttributes *attribs);
+_UI_EXTERN uiOpenGLArea *uiNewScrollingOpenGLArea(uiOpenGLAreaHandler *ah, uiOpenGLAttributes *attribs, int width, int height);
 
 _UI_ENUM(uiOpenGLAttribute) {
     // Desired bit depths of the default framebuffer (integer number of bits).
