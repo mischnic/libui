@@ -37,10 +37,10 @@ if(APPLE)
 	target_link_libraries(cpp-multithread --stdlib=libc++)
 endif()
 
-_add_example(drawtext
-	drawtext/main.c
-	${_EXAMPLE_RESOURCES_RC}
-)
+# _add_example(drawtext
+# 	drawtext/main.c
+# 	${_EXAMPLE_RESOURCES_RC}
+# )
 
 _add_example(timer
         timer/main.c

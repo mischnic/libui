@@ -62,7 +62,7 @@ void uiGridAppend(uiGrid *g, uiControl *c, int left, int top, int xspan, int ysp
 
 void uiGridInsertAt(uiGrid *g, uiControl *c, uiControl *existing, uiAt at, int xspan, int yspan, int hexpand, uiAlign halign, int vexpand, uiAlign valign)
 {
-	qWarning("TODO");
+	qWarning("TODO uiGridInsertAt");
 	// struct gridChild gc;
 	// GtkWidget *widget;
 
